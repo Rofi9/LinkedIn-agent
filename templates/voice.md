@@ -1,6 +1,6 @@
 # voice.md
 
-Copy this to `~/.claude/linkedin/voice.md` and fill it in. Every skill in the
+Copy this to `linkedin/voice.md` and fill it in. Every skill in the
 pack reads it. Ten minutes here is the difference between drafts you post and
 drafts you rewrite.
 
