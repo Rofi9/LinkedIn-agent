@@ -50,7 +50,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .top-row{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
 .brand{display:flex;align-items:baseline;gap:10px}
 .brand h1{font-size:22px;font-weight:700;display:flex;align-items:baseline;gap:6px}
-.brand h1 .mark{width:14px;height:14px;border-radius:50%;background:var(--coral);align-self:center}
+.brand h1 .mark{width:26px;height:26px;align-self:center}
 .brand h1 em{font-family:var(--script);font-style:normal;font-weight:400;font-size:30px;color:var(--coral-text);line-height:1}
 .brand span{font-size:13px;color:var(--muted)}
 .status{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
@@ -125,7 +125,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:60
 /* feed preview: the LinkedIn "see more" cut */
 .preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:14px}
 .preview .who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-.avatar{width:36px;height:36px;border-radius:8px;background:var(--coral);color:var(--coral-ink);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px}
+.avatar{width:36px;height:36px;border-radius:8px;background:#FCF5EA;border:1px solid var(--line);display:grid;place-items:center}
 .preview .who b{display:block;font-size:14px}
 .preview .who span{font-size:12px;color:var(--muted)}
 .preview .shown{white-space:pre-wrap;font-size:14px;line-height:1.5}
@@ -196,7 +196,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
 
 <div class="top">
   <div class="top-row">
-    <div class="brand"><h1><span class="mark" aria-hidden="true"></span>darman.ai <em>studio</em></h1><span>LinkedIn writing desk</span></div>
+    <div class="brand"><h1><img class="mark" alt="" src="__MARK_CORAL__">darman.ai <em>studio</em></h1><span>LinkedIn writing desk</span></div>
     <div class="status" id="status"><span class="dot" id="dbDot"></span><span id="statusText">Connecting…</span></div>
   </div>
   <nav class="tabs" role="tablist" aria-label="Sections">
@@ -311,6 +311,8 @@ details.help ol{margin:8px 0 0;padding-left:20px}
 "use strict";
 const LEX = /*__LEX__*/null;
 const HOOKS = /*__HOOKS__*/null;
+const LOGOS = /*__LOGOS__*/null;
+const LOGO_IMG={}; const logosReady=Promise.all(["lockupInk","lockupCream"].map(k=>new Promise(r=>{const im=new Image(); im.onload=im.onerror=()=>r(); im.src=LOGOS[k]; LOGO_IMG[k]=im;})));
 
 /* ---------------- humanizer (port of li-human) ---------------- */
 const cpChar = s => String.fromCodePoint(parseInt(s.slice(2),16));
@@ -662,7 +664,7 @@ function updateLive(){
   const cut=Math.min(210,t.length); let at=t.lastIndexOf(" ",cut); if(at<120) at=cut; const firstBreak=t.indexOf("\n\n"); const lines=t.slice(0,at).split("\n");
   let shown=t.slice(0,at); if(lines.length>3){ shown=lines.slice(0,3).join("\n"); }
   const rest=t.slice(shown.length);
-  $("preview").innerHTML=`<div class="who"><div class="avatar">d</div><div><b>darman.ai</b><span>Hospitals and Health Care</span></div></div><div class="shown">${esc(shown)}</div>${rest.trim()?`<div class="cut">…see more</div><div class="hiddenpart">${esc(rest.trim())}</div>`:""}`;
+  $("preview").innerHTML=`<div class="who"><div class="avatar"><img alt="" src="${LOGOS.markCoral}" width="24" height="24"></div><div><b>darman.ai</b><span>Hospitals and Health Care</span></div></div><div class="shown">${esc(shown)}</div>${rest.trim()?`<div class="cut">…see more</div><div class="hiddenpart">${esc(rest.trim())}</div>`:""}`;
   const d=detect(t);
   const bars=Object.entries(d.r).map(([k,[v,det]])=>`<div class="meter" title="${esc(det)}"><span class="lbl">${esc(k)}</span><span class="bar"><i class="${v<55?"low":v<70?"mid":""}" style="width:${v.toFixed(0)}%"></i></span><span class="mono">${v.toFixed(0)}</span></div>`).join("");
   $("humanPanel").innerHTML=`<div class="score-head"><div><div class="eyebrow">Human score</div><div class="score-big">${d.overall.toFixed(0)}</div></div><span class="verdict ${d.verdict}">${d.verdict}</span></div>${bars}
@@ -760,8 +762,8 @@ const TEMPLATES={
   carousel:{name:"Carousel",desc:"Slides for a document post (PDF)",fields:[]}
 };
 const PAL={
-  light:{bg:"#FCF5EA",ink:"#171514",muted:"#6F6862",accent:"#FD7550",script:"#E8603A",soft:"#F7E7D6",wash:"rgba(253,117,80,0.20)"},
-  dark:{bg:"#171514",ink:"#FCF5EA",muted:"#B3A99E",accent:"#FD7550",script:"#FD7550",soft:"#27221E",wash:"rgba(253,117,80,0.16)"}
+  light:{logo:"lockupInk",bg:"#FCF5EA",ink:"#171514",muted:"#6F6862",accent:"#FD7550",script:"#E8603A",soft:"#F7E7D6",wash:"rgba(253,117,80,0.20)"},
+  dark:{logo:"lockupCream",bg:"#171514",ink:"#FCF5EA",muted:"#B3A99E",accent:"#FD7550",script:"#FD7550",soft:"#27221E",wash:"rgba(253,117,80,0.16)"}
 };
 const DISP='"Instrument Sans", "Hanken Grotesk", sans-serif', BODY='"Hanken Grotesk", sans-serif', SCRIPT='"Allura", cursive';
 /* Text with *one word* marked renders that word in Darman's coral script, like the page banner. */
@@ -796,8 +798,9 @@ function drawFrame(ctx,p,page,total){
   ctx.fillStyle=p.bg; ctx.fillRect(0,0,1080,1350);
   const g=ctx.createLinearGradient(0,0,260,0); g.addColorStop(0,p.wash); g.addColorStop(1,"rgba(253,117,80,0)");
   ctx.fillStyle=g; ctx.fillRect(0,0,260,1350);
-  ctx.fillStyle=p.accent; ctx.beginPath(); ctx.arc(92,1258,13,0,Math.PI*2); ctx.fill();
-  ctx.font=`700 34px ${DISP}`; ctx.fillStyle=p.ink; ctx.textBaseline="alphabetic"; ctx.fillText("darman.ai",118,1270);
+  const logo=LOGO_IMG[p.logo]; ctx.textBaseline="alphabetic";
+  if(logo&&logo.complete&&logo.naturalWidth){ const h=50, w=logo.naturalWidth*h/logo.naturalHeight; ctx.drawImage(logo,80,1232,w,h); }
+  else { ctx.font=`700 34px ${DISP}`; ctx.fillStyle=p.ink; ctx.fillText("darman.ai",80,1270); }
   if(total){ ctx.font=`600 26px ${BODY}`; ctx.fillStyle=p.muted; ctx.textAlign="right"; ctx.fillText(`${page} / ${total}`,1000,1270); ctx.textAlign="left"; }
 }
 function drawKicker(ctx,p,text,y){ if(!text) return y; ctx.font=`700 27px ${BODY}`; ctx.fillStyle=p.muted; const t=plain(text).toUpperCase(); let x=80; for(const ch of t){ ctx.fillText(ch,x,y); x+=ctx.measureText(ch).width+3; } ctx.fillStyle=p.accent; ctx.fillRect(80,y+18,56,5); return y+70; }
@@ -884,7 +887,7 @@ function drawStage(){
     drawSlide($("visCanvas").getContext("2d"),slides[i],slides.length>1?i+1:0,slides.length>1?slides.length:0);
     if(slides.length>1) $("thumbs").querySelectorAll("canvas").forEach((c,j)=>drawSlide(c.getContext("2d"),slides[j],j+1,slides.length));
   };
-  Promise.all([document.fonts.load('400 60px "Allura"'),document.fonts.load('700 60px "Instrument Sans"'),document.fonts.load('600 40px "Hanken Grotesk"')]).catch(()=>{}).then(()=>document.fonts.ready).then(draw);
+  Promise.all([document.fonts.load('400 60px "Allura"'),document.fonts.load('700 60px "Instrument Sans"'),document.fonts.load('600 40px "Hanken Grotesk"')]).catch(()=>{}).then(()=>document.fonts.ready).then(()=>logosReady).then(draw);
   if(slides.length>1) $("thumbs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.vis.slide=Number(b.dataset.j);renderVisuals();});
   $("savePng").onclick=savePngs; const pdf=$("savePdf"); if(pdf) pdf.onclick=savePdf;
   $("keepVis").onclick=async()=>{ const p=S.posts.find(x=>x.id===S.vis.postId); if(!p) return; await writeDoc("posts/"+p.id,{...p,visual:{template:S.vis.template,fields:S.vis.fields,slides:S.vis.slides,theme:S.vis.theme},updatedAt:now()}); toast("Visual kept with the draft"); };

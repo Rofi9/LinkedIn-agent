@@ -1,4 +1,5 @@
-"""Build studio/darman-studio.html from src.html, the li-human lexicon and the li-post hooks."""
+"""Build studio/darman-studio.html from src.html, the li-human lexicon, the li-post hooks and
+studio/logos.json (data-URI logos made from brand/darman-logo-original.png)."""
 import json, os, re
 here = os.path.dirname(os.path.abspath(__file__))
 root = os.path.dirname(here)
@@ -20,6 +21,8 @@ h = json.load(open(os.path.join(root, ".claude/skills/li-post/hooks.json")))
 hooks = {"rules": h["rules"], "hooks": [{"id": x["id"], "name": x["name"], "template": x["template"],
          "best": x["best_for"], "trap": x["trap"]} for x in h["hooks"]]}
 src = open(os.path.join(here, "src.html")).read()
-out = src.replace("/*__LEX__*/null", json.dumps(lex)).replace("/*__HOOKS__*/null", json.dumps(hooks))
+logos = json.load(open(os.path.join(here, "logos.json")))
+out = (src.replace("/*__LEX__*/null", json.dumps(lex)).replace("/*__HOOKS__*/null", json.dumps(hooks))
+       .replace("/*__LOGOS__*/null", json.dumps(logos)).replace("__MARK_CORAL__", logos["markCoral"]))
 open(os.path.join(here, "darman-studio.html"), "w").write(out)
 print("built", len(out), "bytes")
