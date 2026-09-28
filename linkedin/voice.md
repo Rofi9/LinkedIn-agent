@@ -14,8 +14,7 @@ individual physicians to follow.
 ## Who I am
 
 - **Name:** Darman.ai
-- **What I do, in one sentence:** We help physicians understand how to use
-  generative AI practically and responsibly in their real clinical work,
+- **What I do, in one sentence:** We help physicians understand how to use AI practically and responsibly in their real clinical work,
   through short, specialty-specific education led by doctors who are already
   using these tools.
 - **Who I am writing for:**
