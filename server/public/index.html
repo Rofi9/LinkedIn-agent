@@ -548,8 +548,9 @@ details.help ol{margin:8px 0 0;padding-left:20px}
   });
 
   const caps = { db, sample, downloads };
+  const aiReady = () => !!me?.ai;
   window.claude = Object.freeze({
-    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } return caps[name] || null; },
+    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if (name === "sample" && !aiReady()) return null; return caps[name] || null; },
   });
 })();
 

@@ -238,7 +238,8 @@
   });
 
   const caps = { db, sample, downloads };
+  const aiReady = () => !!me?.ai;
   window.claude = Object.freeze({
-    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } return caps[name] || null; },
+    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if (name === "sample" && !aiReady()) return null; return caps[name] || null; },
   });
 })();
