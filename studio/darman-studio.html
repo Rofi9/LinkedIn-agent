@@ -1,0 +1,942 @@
+<title>Darman Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --sunk:#EBEFEE; --line:#D9E0DE; --line-strong:#B9C4C1;
+  --ink:#14202B; --ink-2:#3E4B55; --muted:#6B7680;
+  --coral:#D94A30; --coral-ink:#FFFFFF; --coral-soft:#FBE3DC;
+  --good:#1F7A5C; --good-soft:#DDF1E8; --warn:#9A6A0B; --warn-soft:#F7ECD2; --bad:#B3261E; --bad-soft:#F9DEDC;
+  --focus:#2563EB;
+  --shadow:0 1px 2px rgba(20,32,43,.06),0 8px 24px -12px rgba(20,32,43,.18);
+  --display:"Bricolage Grotesque","Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1418; --surface:#151E24; --sunk:#10181D; --line:#26323A; --line-strong:#3A4852;
+    --ink:#E6ECEE; --ink-2:#B7C2C8; --muted:#8C99A1;
+    --coral:#FF7457; --coral-ink:#1A0B07; --coral-soft:#3A1E17;
+    --good:#5DCB9F; --good-soft:#12302A; --warn:#E9B84E; --warn-soft:#33280F; --bad:#FF8A80; --bad-soft:#3A1A18;
+    --focus:#7AA7FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1418; --surface:#151E24; --sunk:#10181D; --line:#26323A; --line-strong:#3A4852;
+  --ink:#E6ECEE; --ink-2:#B7C2C8; --muted:#8C99A1;
+  --coral:#FF7457; --coral-ink:#1A0B07; --coral-soft:#3A1E17;
+  --good:#5DCB9F; --good-soft:#12302A; --warn:#E9B84E; --warn-soft:#33280F; --bad:#FF8A80; --bad-soft:#3A1A18;
+  --focus:#7AA7FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font:15px/1.55 var(--body);padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+a{color:var(--coral)}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:12px 16px 0}
+.top-row{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:22px;font-weight:800}
+.brand h1 b{color:var(--coral);font-weight:800}
+.brand span{font-size:13px;color:var(--muted)}
+.status{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
+.dot.on{background:var(--good)}
+.dot.off{background:var(--bad)}
+nav.tabs{max-width:1180px;margin:10px auto 0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;padding:10px 14px 12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:8px;align-items:center}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--coral)}
+nav.tabs .count{font-family:var(--mono);font-size:11.5px;background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--ink-2)}
+
+main{padding-top:22px}
+.section-head{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.section-head h2{font-size:26px;font-weight:700}
+.section-head p{margin:4px 0 0;color:var(--ink-2);max-width:62ch}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.btn{border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center;line-height:1.2}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--coral);border-color:var(--coral);color:var(--coral-ink)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.ghost{background:none;border-color:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--sunk)}
+.btn.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.btn.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;border:1px solid var(--line);background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.chip.draft{background:var(--sunk)}
+.chip.accepted{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.rejected{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.posted{background:var(--ink);color:var(--bg);border-color:transparent}
+.chip.pill-A,.chip.pill-B,.chip.pill-C,.chip.pill-D,.chip.pill-E{background:var(--coral-soft);color:var(--coral);border-color:transparent}
+
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--ink-2)}
+.notice.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.notice.err{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+
+/* ideas */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:18px;font-weight:700;line-height:1.3}
+.card .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.card .fact{font-size:13.5px;color:var(--ink-2);border-left:2px solid var(--line-strong);padding-left:10px}
+.card .foot{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:4px}
+.card .src{font-size:12.5px;overflow-wrap:anywhere}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* drafts */
+.split{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:18px;align-items:start}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:6px}
+.row{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:5px}
+.row[aria-current="true"]{border-color:var(--coral);box-shadow:0 0 0 1px var(--coral)}
+.row .first{font-weight:600;font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row .sub{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.editor{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.editor-top{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.ed-grid{display:grid;grid-template-columns:1fr 280px;gap:16px}
+@media (max-width:1040px){.ed-grid{grid-template-columns:1fr}}
+textarea{width:100%;border:1px solid var(--line-strong);background:var(--bg);border-radius:10px;padding:12px 14px;line-height:1.6;resize:vertical}
+textarea#postText{min-height:360px;font-size:15px}
+textarea.small{min-height:90px;font-size:13.5px}
+input[type=text],input[type=url],select{width:100%;border:1px solid var(--line-strong);background:var(--bg);border-radius:8px;padding:8px 10px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.counter{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);gap:8px;flex-wrap:wrap}
+.counter .over{color:var(--bad);font-weight:700}
+
+/* feed preview: the LinkedIn "see more" cut */
+.preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:14px}
+.preview .who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.avatar{width:36px;height:36px;border-radius:8px;background:var(--coral);color:var(--coral-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.preview .who b{display:block;font-size:14px}
+.preview .who span{font-size:12px;color:var(--muted)}
+.preview .shown{white-space:pre-wrap;font-size:14px;line-height:1.5}
+.preview .cut{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:11.5px;color:var(--coral);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.preview .cut::before,.preview .cut::after{content:"";flex:1;border-top:1px dashed var(--coral)}
+.preview .hiddenpart{white-space:pre-wrap;font-size:14px;line-height:1.5;color:var(--muted);max-height:120px;overflow:hidden;mask-image:linear-gradient(#000 40%,transparent)}
+
+/* human panel */
+.panel{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.score-head{display:flex;justify-content:space-between;align-items:baseline}
+.score-big{font-family:var(--mono);font-size:30px;font-weight:600}
+.verdict{font-size:12px;font-weight:700;letter-spacing:.06em;border-radius:6px;padding:2px 8px}
+.verdict.PASS{background:var(--good-soft);color:var(--good)}
+.verdict.REVIEW{background:var(--warn-soft);color:var(--warn)}
+.verdict.FLAGGED{background:var(--bad-soft);color:var(--bad)}
+.meter{display:grid;grid-template-columns:98px 1fr 34px;gap:8px;align-items:center;font-size:11.5px}
+.meter .lbl{font-weight:700;letter-spacing:.05em;color:var(--ink-2)}
+.meter .bar{height:6px;background:var(--sunk);border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.meter .bar i{display:block;height:100%;background:var(--good)}
+.meter .bar i.mid{background:var(--warn)}
+.meter .bar i.low{background:var(--bad)}
+.flags{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.flags div{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:6px 9px}
+.flags div b{display:block}
+
+.revise{display:flex;gap:8px;flex-wrap:wrap}
+.revise input{flex:1 1 220px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+
+/* visuals */
+.vis{display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:18px;align-items:start}
+@media (max-width:860px){.vis{grid-template-columns:1fr}}
+.stage{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.stage canvas{width:100%;max-width:420px;height:auto;border-radius:6px;box-shadow:var(--shadow);background:#fff}
+.thumbs{display:flex;gap:8px;overflow-x:auto;max-width:100%;padding-bottom:4px}
+.thumbs button{border:2px solid transparent;border-radius:6px;padding:0;background:none;cursor:pointer;flex:0 0 auto}
+.thumbs button[aria-current="true"]{border-color:var(--coral)}
+.thumbs canvas{width:72px;height:90px;display:block;border-radius:4px;box-shadow:none}
+.tmpl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tmpl button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px;text-align:left;cursor:pointer}
+.tmpl button[aria-pressed="true"]{border-color:var(--coral);box-shadow:0 0 0 1px var(--coral)}
+.tmpl b{display:block;font-size:14px}
+.tmpl span{font-size:12px;color:var(--muted)}
+.fields{display:flex;flex-direction:column;gap:10px}
+
+/* research */
+.res{display:flex;flex-direction:column;gap:8px}
+.res-item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:start}
+@media (max-width:640px){.res-item{grid-template-columns:1fr}}
+.res-item h4{margin:0 0 3px;font-size:15px}
+.res-item p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.res-item .src{font-size:12px;overflow-wrap:anywhere}
+.add{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.add .two{display:grid;grid-template-columns:1fr 200px;gap:10px}
+@media (max-width:640px){.add .two{grid-template-columns:1fr}}
+details.help{font-size:13.5px;color:var(--ink-2)}
+details.help summary{cursor:pointer;font-weight:600;color:var(--ink)}
+details.help ol{margin:8px 0 0;padding-left:20px}
+
+.empty{border:1px dashed var(--line-strong);border-radius:12px;padding:26px;text-align:center;color:var(--muted)}
+.thinking{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.thinking::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--coral);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.thinking::before{animation:none}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--shadow);z-index:50}
+.confirm{display:flex;gap:8px;align-items:center;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:6px 10px;font-size:13px;flex-wrap:wrap}
+</style>
+
+<div class="top">
+  <div class="top-row">
+    <div class="brand"><h1>darman<b>.</b>studio</h1><span>LinkedIn writing desk for Darman.ai</span></div>
+    <div class="status" id="status"><span class="dot" id="dbDot"></span><span id="statusText">Connecting…</span></div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-ideas" aria-selected="true" data-tab="ideas">Ideas <span class="count" id="c-ideas">0</span></button>
+    <button role="tab" id="tab-drafts" aria-selected="false" data-tab="drafts">Drafts <span class="count" id="c-drafts">0</span></button>
+    <button role="tab" id="tab-visuals" aria-selected="false" data-tab="visuals">Visuals</button>
+    <button role="tab" id="tab-research" aria-selected="false" data-tab="research">Research <span class="count" id="c-research">0</span></button>
+    <button role="tab" id="tab-voice" aria-selected="false" data-tab="voice">Voice</button>
+  </nav>
+</div>
+
+<main class="wrap">
+  <div id="banner"></div>
+
+  <!-- IDEAS -->
+  <section id="p-ideas" role="tabpanel" aria-labelledby="tab-ideas">
+    <div class="section-head">
+      <div><h2>Ideas</h2><p>Each idea rests on a sourced fact from your research. Generate a post from one, or ask Claude for new ones based on what's in Research.</p></div>
+      <div class="actions">
+        <select id="ideaFocus" aria-label="Focus for new ideas" style="width:auto">
+          <option value="">Any topic</option>
+          <option value="hospital">Hospitals adopting AI</option>
+          <option value="government">Governments and regulation</option>
+          <option value="physician">What doctors are debating</option>
+          <option value="competitor">Training market and competitors</option>
+          <option value="study">New studies</option>
+          <option value="region">Armenia, the Gulf and the CIS</option>
+        </select>
+        <button class="btn primary" id="suggestBtn">Suggest 5 ideas</button>
+      </div>
+    </div>
+    <div class="filters" id="ideaFilters"></div>
+    <div id="ideaMsg"></div>
+    <div class="grid" id="ideaGrid"></div>
+  </section>
+
+  <!-- DRAFTS -->
+  <section id="p-drafts" role="tabpanel" aria-labelledby="tab-drafts" hidden>
+    <div class="section-head">
+      <div><h2>Drafts</h2><p>Review, edit, accept or reject. Studio never posts anything. When a draft is ready, copy it and post it on LinkedIn yourself, then mark it posted.</p></div>
+    </div>
+    <div class="filters" id="draftFilters"></div>
+    <div class="split">
+      <div class="list" id="draftList"></div>
+      <div id="editorWrap"></div>
+    </div>
+  </section>
+
+  <!-- VISUALS -->
+  <section id="p-visuals" role="tabpanel" aria-labelledby="tab-visuals" hidden>
+    <div class="section-head">
+      <div><h2>Visuals</h2><p>Pick a draft, let Claude suggest a visual, adjust the words, and save the image. Sized 1080 × 1350, LinkedIn's tallest feed format.</p></div>
+    </div>
+    <div class="vis">
+      <div class="fields" id="visFields"></div>
+      <div class="stage" id="visStage"></div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="p-research" role="tabpanel" aria-labelledby="tab-research" hidden>
+    <div class="section-head">
+      <div><h2>Research</h2><p>The facts ideas are built from: hospitals, regulators, doctors who post about AI, studies and competitors. Add anything you read, including LinkedIn posts, and Claude explains it in plain English.</p></div>
+    </div>
+    <div class="add">
+      <h3 style="font-size:17px">Add something you read</h3>
+      <details class="help">
+        <summary>Bringing in LinkedIn posts with Claude in Chrome</summary>
+        <ol>
+          <li>Open a LinkedIn post, or a doctor's profile activity, in Chrome.</li>
+          <li>Ask the Claude extension: "Copy the full text of this post, the author's name and role, and the post's link."</li>
+          <li>Paste the result below and press Analyze. Do this one post at a time, at your normal reading pace. Bulk collection breaks LinkedIn's terms and can get the account restricted.</li>
+        </ol>
+      </details>
+      <label class="f" for="resText">Text, article excerpt or post
+        <textarea id="resText" class="small" placeholder="Paste a LinkedIn post, a news story, or a study abstract…"></textarea>
+      </label>
+      <div class="two">
+        <label class="f" for="resUrl">Link (optional)<input type="url" id="resUrl" placeholder="https://…"></label>
+        <label class="f" for="resKind">What is it?
+          <select id="resKind">
+            <option value="auto">Let Claude decide</option>
+            <option value="hospital">Hospital or health system</option>
+            <option value="government">Government or regulator</option>
+            <option value="physician">Doctor's post or article</option>
+            <option value="study">Study</option>
+            <option value="competitor">Competitor</option>
+            <option value="news">Other news</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions"><button class="btn primary" id="analyzeBtn">Analyze and suggest ideas</button><span id="analyzeMsg"></span></div>
+      <div id="analyzeOut"></div>
+    </div>
+    <div class="filters" id="resFilters"></div>
+    <div class="res" id="resList"></div>
+  </section>
+
+  <!-- VOICE -->
+  <section id="p-voice" role="tabpanel" aria-labelledby="tab-voice" hidden>
+    <div class="section-head">
+      <div><h2>Voice</h2><p>Every draft Claude writes follows this profile: who Darman writes for, its positions, and the claims it must never make. Edit it here and every new draft uses it.</p></div>
+      <div class="actions"><button class="btn primary" id="saveVoice">Save voice</button></div>
+    </div>
+    <textarea id="voiceText" style="min-height:560px;font-size:14px" aria-label="Voice profile"></textarea>
+  </section>
+</main>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+"use strict";
+const LEX = {"inv": ["U+200B", "U+200C", "U+200D", "U+2060", "U+FEFF", "U+00AD", "U+180E", "U+061C", "U+200E", "U+200F", "U+E0000-U+E007F"], "invSpace": ["U+00A0", "U+202F", "U+2009", "U+2007", "U+2003", "U+2002"], "typo": [["\u2014", ", "], ["\u2013", "-"], ["\u2018", "'"], ["\u2019", "'"], ["\u201c", "\""], ["\u201d", "\""], ["\u2026", "..."], ["\u2032", "'"], ["\u00b7", "-"], ["\u2022", "-"], ["\u2192", "->"]], "lex": [["in the ever-evolving landscape of", "in"], ["in the ever-changing world of", "in"], ["in today's fast-paced world", "right now"], ["i am excited to announce", ""], ["what are your thoughts?", ""], ["it is worth noting that", "note that"], ["in today's digital age", "right now"], ["had the opportunity to", "got to"], ["imagine a world where", "imagine if"], ["at the end of the day", ""], ["i'm thrilled to share", ""], ["we've all been there", ""], ["drop a comment below", ""], ["it's no secret that", ""], ["the choice is yours", ""], ["without further ado", ""], ["save this for later", ""], ["the future is here", ""], ["the harsh truth is", ""], ["here's the thing", ""], ["let that sink in", ""], ["food for thought", ""], ["when it comes to", "with"], ["move the needle", "make a difference"], ["i am humbled to", ""], ["read that again", ""], ["a wide range of", "many"], ["a testament to", "proof of"], ["you're welcome", ""], ["dive deep into", "get into"], ["transformative", "big"], ["groundbreaking", "new"], ["treasure trove", "pile"], ["let's face it", ""], ["needle-moving", "useful"], ["spoiler alert", ""], ["who's with me", ""], ["revolutionize", "change"], ["comprehensive", "complete"], ["game-changing", "big"], ["in conclusion", "so"], ["picture this", ""], ["cutting-edge", "new"], ["game-changer", "big deal"], ["unparalleled", "unmatched"], ["meticulously", "carefully"], ["multifaceted", "complicated"], ["testament to", "proof of"], ["additionally", "also"], ["nevertheless", "still"], ["consequently", "so"], ["underscores", "shows"], ["cornerstone", "base"], ["plethora of", "lots of"], ["furthermore", "also"], ["importantly", ""], ["in order to", "to"], ["delve into", "look at"], ["leveraging", "using"], ["facilitate", "help"], ["streamline", "simplify"], ["underscore", "show"], ["seamlessly", "cleanly"], ["invaluable", "useful"], ["meticulous", "careful"], ["innovative", "new"], ["remarkable", "notable"], ["compelling", "convincing"], ["north star", "goal"], ["ultimately", "in the end"], ["in essence", "basically"], ["buckle up", ""], ["deep dive", "breakdown"], ["utilizing", "using"], ["embark on", "start"], ["spearhead", "lead"], ["cultivate", "build"], ["myriad of", "many"], ["landscape", "market"], ["ecosystem", "system"], ["leverage", "use"], ["showcase", "show"], ["seamless", "clean"], ["holistic", "whole"], ["profound", "big"], ["tapestry", "mix"], ["paradigm", "model"], ["plethora", "lots"], ["moreover", "also"], ["utilize", "use"], ["harness", "use"], ["elevate", "improve"], ["amplify", "boost"], ["curated", "picked"], ["empower", "let"], ["pivotal", "key"], ["crucial", "important"], ["bespoke", "custom"], ["journey", "process"], ["synergy", "overlap"], ["arsenal", "set"], ["notably", ""], ["foster", "build"], ["unlock", "get"], ["curate", "pick"], ["robust", "solid"], ["myriad", "many"], ["beacon", "signal"], ["delve", "look"], ["vital", "important"], ["realm", "world"], ["hence", "so"], ["thus", "so"]], "st": [{"name": "\"It's not just X, it's Y\"", "re": "\\bit'?s not (?:just|only) [^.!?\\n]{2,60}[,.] it'?s\\b", "fl": "gmi", "fix": "Say the one thing you actually mean. Delete the setup half."}, {"name": "\"Not only X but also Y\"", "re": "\\bnot only\\b[^.!?\\n]{2,80}\\bbut also\\b", "fl": "gmi", "fix": "Split into two sentences, or drop the weaker half."}, {"name": "\"It isn't about X. It's about Y.\"", "re": "\\b(?:this|it) is(?:n'?t| not) about [^.!?\\n]{2,60}[.!] it'?s about\\b", "fl": "gmi", "fix": "Lead with Y. The reversal is the tell."}, {"name": "One-word rhetorical question line", "re": "^\\s*(?:the result|the best part|the kicker|the catch)\\?\\s*$", "fl": "gmi", "fix": "Answer it inline instead of staging a reveal."}, {"name": "\"Here's what I learned\"", "re": "\\bhere'?s what (?:i|we) learned\\b", "fl": "gmi", "fix": "State the lesson. Skip the announcement."}, {"name": "Rule-of-three triad", "re": "\\b\\w+, \\w+, and \\w+\\.", "fl": "gmi", "fix": "Two items or four. Three is the model's default rhythm."}, {"name": "Rocket / fire / bulb / sparkle / dart emoji", "re": "[\\u{1F680}\\u{1F525}\\u{1F4A1}\\u2728\\u{1F3AF}]", "fl": "gmu", "fix": "One emoji max, and not one of these five."}, {"name": "Hashtag wall (5+)", "re": "(?:#\\w+[ \\t]*){5,}", "fl": "gm", "fix": "Three hashtags. LinkedIn stopped rewarding the wall."}, {"name": "Model self-reference", "re": "\\bas an ai\\b|\\bas a language model\\b", "fl": "gmi", "fix": "Delete the sentence."}, {"name": "Essay-closer opener", "re": "^\\s*(?:in summary|to summarize|in conclusion)\\b", "fl": "gmi", "fix": "A post does not need a conclusion paragraph."}, {"name": "Reflex engagement bait", "re": "\\b(?:agree\\?|thoughts\\?|who else\\b|am i wrong\\?)\\s*$", "fl": "gmi", "fix": "Ask a question only you could ask, about the specific thing above it."}]};
+const HOOKS = {"rules": ["One idea per hook. If it needs a comma splice, it needs two posts.", "Line 2 is not a hook, it is the payoff of line 1. Never waste it on setup.", "No question marks in line 1 unless the question is specific enough that only you could ask it.", "Numbers beat adjectives. '$4,200' beats 'a lot of money' every time.", "If the hook works with any other person's name on it, it is not your hook."], "hooks": [{"id": 1, "name": "Contrarian Take", "template": "Everyone says {common advice}. After {specific experience}, I think that is wrong.", "best": "Establishing a point of view. Highest comment rate of any formula.", "trap": "Being contrarian about something nobody believes. The belief has to be genuinely common."}, {"id": 2, "name": "Number Reveal", "template": "I {did thing} for {N} {days/weeks}. Here is what actually happened.", "best": "Experiments, challenges, anything with a countable result.", "trap": "Burying the number. Put it in line 1 or the formula does nothing."}, {"id": 3, "name": "Mistake Confession", "template": "{Specific cost} is what {one mistake} cost me.", "best": "Trust. People forward the posts where you look bad.", "trap": "A fake-humble mistake. 'I care too much' reads as a brag and kills the post."}, {"id": 4, "name": "Before / After", "template": "{Time ago} I was {low state}. Today I {high state}. The difference was {one thing}.", "best": "Proof you have travelled the distance your reader wants to travel.", "trap": "Three-part transformations. Name one lever or the reader stops believing you."}, {"id": 5, "name": "The List Promise", "template": "{N} things I wish someone had told me before {milestone}.", "best": "Saves. Highest save rate of the 21, which LinkedIn weights heavily.", "trap": "N above 10. The reader does not believe you have 15 good ones, and you do not."}, {"id": 6, "name": "Insider Secret", "template": "After {N} years {doing thing}, here is the part nobody puts in the {job posting/course/pitch}.", "best": "Credentialed takes. Works only if the years are real.", "trap": "Promising a secret and delivering common knowledge. The comments will say so."}, {"id": 7, "name": "The Callout", "template": "If you are still {doing outdated thing}, stop.", "best": "Short posts with one instruction. Fastest to write of the 21.", "trap": "Calling out something nobody does. Or worse, calling out your own audience with contempt."}, {"id": 8, "name": "Question Trap", "template": "{Specific scenario with a real cost}. What do you do?", "best": "Comment volume. People answer scenarios, they ignore 'thoughts?'.", "trap": "A question with an obvious right answer. There has to be a real fork."}, {"id": 9, "name": "Story Cold Open", "template": "\"{Line of dialogue}\"\\n\\n{Who said it, when, and why it mattered}.", "best": "Long-form storytelling posts. Highest dwell time.", "trap": "Dialogue nobody would actually say. Use the real line, including the ugly parts."}, {"id": 10, "name": "The Receipt", "template": "{Screenshot or hard number}. {One sentence of context}.", "best": "Anything you can prove. Pair with an image and reach roughly doubles.", "trap": "A receipt with no story attached. The number opens the door, the story is the room."}, {"id": 11, "name": "Myth Bust", "template": "{Popular explanation} is not why {bad outcome} is happening to you.", "best": "Reframing. Sets you up to deliver the real cause in line 3.", "trap": "Busting the myth and never naming the replacement. Always name it."}, {"id": 12, "name": "The Comparison", "template": "{Expensive option} vs {cheap option}. {Surprising verdict}.", "best": "Tool and process posts. Very high share rate.", "trap": "An unfair comparison. Concede what the expensive option genuinely does better."}, {"id": 13, "name": "Permission Slip", "template": "You are allowed to {thing the reader feels guilty about}.", "best": "Reach beyond your niche. These travel further than tactical posts.", "trap": "Generic self-care. It has to be specific to the working life of your reader."}, {"id": 14, "name": "Pattern Interrupt", "template": "{One word or three-word line, full stop.}", "best": "Stopping the scroll cold. Whitespace does the work.", "trap": "Overuse. Once a month. Every post starting this way reads as a tic."}, {"id": 15, "name": "The Warning", "template": "{Common practice} is quietly costing you {specific thing they care about}.", "best": "Problem-aware audiences who have not connected cause to cost.", "trap": "Fear with no exit. Give the fix in the same post or you have just made someone anxious."}, {"id": 16, "name": "Good vs Great", "template": "Good {role} {do X}. Great {role} {do Y}.", "best": "Quotable one-liners. Screenshot bait.", "trap": "A distinction that is really just 'try harder'. Y has to be a different action, not more effort."}, {"id": 17, "name": "Time Anchor", "template": "{Task} used to take me {long time}. It now takes {short time}.", "best": "Tool, system and automation posts. The strongest hook shape for a how-to.", "trap": "An unbelievable ratio. 5 hours to 20 minutes lands. 5 hours to 8 seconds does not."}, {"id": 18, "name": "The Unpopular Rule", "template": "I do not {widely accepted practice}. Ever. Here is why.", "best": "Positioning. Attracts the right clients by repelling the wrong ones.", "trap": "A rule you break constantly. Someone in the comments will know."}, {"id": 19, "name": "Curiosity Gap", "template": "The {superlative} {thing} I ever {verb} {broke the obvious rule}.", "best": "Openers that force the 'see more' tap.", "trap": "A gap you never close. Pay it off by line 4 or you have written clickbait."}, {"id": 20, "name": "The Walk-Away", "template": "I {fired/quit/deleted/cancelled} {valuable thing}. {Result}.", "best": "Values posts with a business result attached. Very high engagement.", "trap": "Walking away with no cost. Name what it actually cost you or it reads as theatre."}, {"id": 21, "name": "The Direct Value", "template": "Here is the exact {artifact} I used to {specific outcome}. Steal it.", "best": "Lead magnets and comment-for-link posts. Highest conversion of the 21.", "trap": "Making them ask for something you could have just posted. Give the artifact away in the post."}]};
+
+/* ---------------- humanizer (port of li-human) ---------------- */
+const cpChar = s => String.fromCodePoint(parseInt(s.slice(2),16));
+function cpPattern(spec){
+  if (spec.includes("-")){ const [a,b]=spec.split("-"); return "["+cpChar(a)+"-"+cpChar(b)+"]"; }
+  return cpChar(spec).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+}
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const lexRe = LEX.lex.map(([find,rep]) => [new RegExp("\\b"+escRe(find).replace(/\\? /g,"\\s+")+"\\b","gi"),rep,find]);
+const stRe = LEX.st.map(s => { try { return {re:new RegExp(s.re,s.fl),name:s.name,fix:s.fix}; } catch(e){ return null; } }).filter(Boolean);
+const CF = /\p{Cf}/gu;
+function matchCase(src,rep){
+  if(!rep) return rep;
+  if(src.length>1 && src===src.toUpperCase() && /[A-Z]/.test(src)) return rep.toUpperCase();
+  if(/^[A-Z]/.test(src)) return rep[0].toUpperCase()+rep.slice(1);
+  return rep;
+}
+function humanize(text){
+  const urls=[]; let t=text.replace(/https?:\/\/\S+|www\.\S+|\S+@\S+\.\S+/g,m=>{urls.push(m);return "\u0000URL"+(urls.length-1)+"\u0000";});
+  let changes=0;
+  for(const cp of LEX.inv){ const re=new RegExp(cpPattern(cp),"gu"); t=t.replace(re,()=>{changes++;return "";}); }
+  for(const cp of LEX.invSpace){ const re=new RegExp(cpPattern(cp),"gu"); t=t.replace(re,()=>{changes++;return " ";}); }
+  t=t.replace(/\p{Cf}/gu,m=>{ if(m==="\u0000") return m; changes++; return ""; });
+  for(const [from,to] of LEX.typo){
+    if(!t.includes(from)) continue;
+    changes += t.split(from).length-1;
+    if(from==="—") t=t.replace(/\s*—\s*/g,", ");
+    else if(from==="–"){ t=t.replace(/\s*–\s*(?=\d)/g,"-").replace(/\s+–\s+/g,", ").replace(/–/g,"-"); }
+    else t=t.split(from).join(to);
+  }
+  t=t.replace(/,\s*([,.;:!?])/g,"$1").replace(/,\s*\n/g,"\n");
+  for(const [re,rep] of lexRe){ t=t.replace(re,m=>{changes++;return matchCase(m,rep);}); }
+  t=t.replace(/[ \t]{2,}/g," ").replace(/^[ \t]*([,.;:])\s*/gm,"").replace(/[ \t]+([,.;:!?])/g,"$1").replace(/^[ \t]+$/gm,"").replace(/\n{3,}/g,"\n\n");
+  urls.forEach((u,i)=>{ t=t.split("\u0000URL"+i+"\u0000").join(u); });
+  return {text:t.trim(),changes};
+}
+const clamp=n=>Math.max(0,Math.min(100,n));
+const scale=(v,h,m)=>h===m?50:clamp((v-m)/(h-m)*100);
+const sentLens=t=>(t.match(/[^.!?\n]+[.!?]*/g)||[]).map(s=>s.trim().split(/\s+/).filter(Boolean).length).filter(n=>n>2);
+const wordsOf=t=>t.match(/[A-Za-z']+/g)||[];
+function stdev(a){const m=a.reduce((x,y)=>x+y,0)/a.length;return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length);}
+function detect(text){
+  const w=wordsOf(text), r={};
+  const lens=sentLens(text);
+  if(lens.length<4) r.BURSTINESS=[50,"too short to judge"];
+  else { const m=lens.reduce((a,b)=>a+b,0)/lens.length, cv=stdev(lens)/m; r.BURSTINESS=[scale(cv,.70,.22),`sentence length variation ${cv.toFixed(2)} (want 0.55+)`]; }
+  if(w.length<25) r.SPECIFICITY=[50,"too short to judge"];
+  else { const nums=(text.match(/\b\d[\d,.]*%?|\$\d/g)||[]).length; const prop=new Set(text.match(/(?<![.!?]\s)(?<!^)\b[A-Z][a-z]{2,}\b/gm)||[]).size; const d=(nums+prop)*100/w.length; r.SPECIFICITY=[scale(d,6,.5),`${nums+prop} numbers and names, ${d.toFixed(1)} per 100 words (want 4+)`]; }
+  let hits=0; const found=[]; for(const [re,,find] of lexRe){ const n=(text.match(re)||[]).length; if(n){hits+=n;found.push(find);} }
+  r["SLOP DENSITY"]= w.length? [scale(hits*100/w.length,0,4),`${hits} stock phrases`+(found.length?` (${found.slice(0,3).join(", ")})`:"")] : [50,"empty"];
+  const inv=(text.match(CF)||[]).length, em=(text.match(/—/g)||[]).length, curly=(text.match(/[‘’“”]/g)||[]).length, el=(text.match(/…/g)||[]).length;
+  const per1k=(inv*4+em*2+curly+el)*1000/Math.max(text.length,1);
+  r.FINGERPRINT=[scale(per1k,0,12),`${inv} invisible, ${em} em dash, ${curly} curly quote`];
+  if(w.length<25) r.VOICE=[50,"too short to judge"];
+  else {
+    const per=100/w.length; const con=(text.match(/\b\w+'(?:s|t|re|ve|ll|d|m)\b/gi)||[]).length*per; const pro=(text.match(/\b(i|me|my|mine|we|us|our|you|your)\b/gi)||[]).length*per;
+    let tells=0; for(const s of stRe){ s.re.lastIndex=0; tells+=(text.match(s.re)||[]).length; }
+    r.VOICE=[clamp(scale(con,3,0)*.35+scale(pro,8,1)*.35+clamp(100-tells*22)*.30),`${con.toFixed(1)} contractions per 100 words, ${tells} structural tell(s)`];
+  }
+  const scores=Object.values(r).map(x=>x[0]); const mean=scores.reduce((a,b)=>a+b,0)/scores.length; const min=Math.min(...scores);
+  const overall=mean*.6+min*.4; const verdict= overall>=70&&min>=55?"PASS":overall>=50?"REVIEW":"FLAGGED";
+  const flags=[]; for(const s of stRe){ s.re.lastIndex=0; const n=(text.match(s.re)||[]).length; if(n) flags.push({name:s.name,fix:s.fix,n}); }
+  if(lens.length>=4){ const m=lens.reduce((a,b)=>a+b,0)/lens.length, cv=stdev(lens)/m; if(cv<.35) flags.push({name:"Sentences are all a similar length",fix:"Break one sentence in half. Let another run long.",n:lens.length}); }
+  return {r,overall,verdict,flags};
+}
+
+/* ---------------- state & helpers ---------------- */
+const S={db:null,sample:null,downloads:null,ideas:[],posts:[],research:[],voice:"",tab:"ideas",ideaFilter:"new",draftFilter:"open",resFilter:"all",current:null,dirty:false,vis:{postId:null,template:"stat",slides:[],slide:0,theme:"light",fields:{}}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PILLARS={A:"Generic isn't enough",B:"Knowing how is the barrier",C:"Limitations matter",D:"Doctors learn from doctors",E:"Not a one-time training"};
+const KINDS={hospital:"Hospital",government:"Government",physician:"Doctor",study:"Study",competitor:"Competitor",topic:"Topic",news:"News",linkedin:"LinkedIn"};
+let toastT; function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600);}
+const now=()=>new Date().toISOString();
+const fmtDate=iso=>{ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?iso:d.toLocaleDateString(undefined,{day:"numeric",month:"short"}); };
+function sampleErr(e){
+  const c=e&&e.code;
+  if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled") return "Claude isn't allowed on this page for your account. Allow it when asked, or open Studio in claude.ai.";
+  if(c==="rate_limited") return "Claude is busy or you've hit your usage limit. Try again in a few minutes.";
+  if(c==="invalid_json") return "Claude's answer came back in the wrong shape. Press the button again.";
+  if(c==="refused") return "Claude declined this request. Try rewording it.";
+  if(c==="session_expired") return "Your claude.ai session expired. Sign in again.";
+  if(c==="prompt_too_large") return "Too much text for one request. Shorten what you pasted.";
+  if(c==="cancelled") return "Stopped.";
+  return "Something went wrong reaching Claude. Try again.";
+}
+async function copyText(text,label){
+  try{ await navigator.clipboard.writeText(text); toast(label+" copied"); return true; }
+  catch(e){ toast("Copy blocked here. Select the text and copy it manually."); return false; }
+}
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+function showTab(t){
+  S.tab=t;
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
+  ["ideas","drafts","visuals","research","voice"].forEach(x=>$("p-"+x).hidden=x!==t);
+  try{localStorage.setItem("studio.tab",t);}catch(e){}
+  if(t==="visuals") renderVisuals();
+}
+
+/* ---------------- prompt context ---------------- */
+function hooksBrief(){ return HOOKS.hooks.map(h=>`#${h.id} ${h.name}: ${h.template} (best for: ${h.best}; trap: ${h.trap})`).join("\n"); }
+function researchBrief(limit=40,kind=""){
+  let items=S.research.slice();
+  if(kind==="region") items=items.filter(r=>/armenia|gulf|uae|saudi|qatar|abu dhabi|dubai|cis|uzbek|caucas/i.test((r.title||"")+" "+(r.summary||"")+" "+(r.region||"")));
+  else if(kind) items=items.filter(r=>r.kind===kind);
+  items.sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));
+  return items.slice(0,limit).map(r=>`- [${r.kind}] ${r.title}: ${r.summary}${r.fact?" | FACT: "+r.fact:""}${r.caution?" | CAUTION: "+r.caution:""}${r.url?" | SOURCE: "+r.url:""}${r.date?" ("+r.date+")":""}`).join("\n");
+}
+const RULES=`NON-NEGOTIABLE RULES
+- Never invent numbers, studies, people, quotes or outcomes. Use only facts given to you here. If a number would help but isn't given, write {{your number}}.
+- Never claim Darman.ai improves patient outcomes, reduces errors, makes AI "safe", is accredited, gives CME/CPD credit, is HIPAA/GDPR compliant, or saves a specific amount of time.
+- Never attack a competitor. No fearmongering, no "AI will replace doctors".
+- Say whether a rule is binding law or guidance, and never imply EU/US rules bind Armenian or Gulf hospitals.
+- Sound like a knowledgeable person: contractions, mixed sentence length, no em dashes, no hashtag walls, no "Thoughts?" endings, no emoji decoration.
+- Avoid: revolutionary, game-changing, unlock, delve, leverage, seamless, robust, "in today's fast-paced world".`;
+
+/* ---------------- ideas ---------------- */
+function renderIdeas(){
+  const f=S.ideaFilter;
+  const counts={new:0,drafted:0,dismissed:0}; S.ideas.forEach(i=>counts[i.status||"new"]=(counts[i.status||"new"]||0)+1);
+  $("c-ideas").textContent=counts.new;
+  $("ideaFilters").innerHTML=[["new","New"],["drafted","Drafted"],["dismissed","Dismissed"]].map(([k,l])=>`<button aria-pressed="${f===k}" data-f="${k}">${l} · ${counts[k]||0}</button>`).join("");
+  $("ideaFilters").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.ideaFilter=b.dataset.f;renderIdeas();});
+  const list=S.ideas.filter(i=>(i.status||"new")===f).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  if(!list.length){ $("ideaGrid").innerHTML=`<div class="empty">${f==="new"?"No new ideas. Press “Suggest 5 ideas” to get some from your research.":"Nothing here yet."}</div>`; return; }
+  $("ideaGrid").innerHTML=list.map(i=>`
+    <article class="card" data-id="${esc(i.id)}">
+      <div class="meta">${i.pillar?`<span class="chip pill-${esc(i.pillar)}" title="Content pillar">${esc(PILLARS[i.pillar]||i.pillar)}</span>`:""}${i.hookId?`<span class="chip">Hook #${esc(i.hookId)}</span>`:""}${i.origin?`<span class="chip">${esc(i.origin)}</span>`:""}</div>
+      <h3>${esc(i.hook)}</h3>
+      ${i.angle?`<div style="font-size:14px">${esc(i.angle)}</div>`:""}
+      ${i.fact?`<div class="fact">${esc(i.fact)}</div>`:""}
+      ${i.caution?`<div class="muted" style="font-size:12.5px"><b>Don't overclaim:</b> ${esc(i.caution)}</div>`:""}
+      <div class="foot">
+        <span class="src">${i.url?`<a href="${esc(i.url)}" target="_blank" rel="noopener">Source</a>`:""}</span>
+        <span class="actions">
+          ${(i.status||"new")==="new"?`<button class="btn ghost sm" data-act="dismiss">Dismiss</button><button class="btn primary sm" data-act="gen">Generate post</button>`:""}
+          ${i.status==="dismissed"?`<button class="btn ghost sm" data-act="restore">Restore</button>`:""}
+          ${i.status==="drafted"&&i.postId?`<button class="btn sm" data-act="open">Open draft</button>`:""}
+        </span>
+      </div>
+      <div class="gen-msg"></div>
+    </article>`).join("");
+  $("ideaGrid").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>ideaAction(b.closest(".card").dataset.id,b.dataset.act,b));
+}
+async function ideaAction(id,act,btn){
+  const idea=S.ideas.find(i=>i.id===id); if(!idea) return;
+  if(act==="dismiss"||act==="restore"){ await writeDoc("ideas/"+id,{...idea,status:act==="dismiss"?"dismissed":"new"}); return; }
+  if(act==="open"){ S.current=idea.postId; S.draftFilter="all"; showTab("drafts"); renderDrafts(); return; }
+  if(act==="gen") generatePost(idea,btn);
+}
+async function generatePost(idea,btn){
+  const msg=btn.closest(".card").querySelector(".gen-msg");
+  if(!S.sample){ msg.innerHTML=`<div class="notice warn">Claude isn't available in this view, so Studio can't write drafts here.</div>`; return; }
+  btn.disabled=true; msg.innerHTML=`<span class="thinking">Claude is writing the draft. This takes up to a minute.</span>`;
+  const prompt=`You write LinkedIn posts for the Darman.ai company page.
+
+VOICE PROFILE (follow it exactly):
+${S.voice.slice(0,9000)}
+
+${RULES}
+
+HOOK FORMULAS (pick the one that fits; give its number):
+${hooksBrief()}
+
+THE IDEA TO WRITE:
+Hook idea: ${idea.hook}
+Angle: ${idea.angle||""}
+Pillar: ${PILLARS[idea.pillar]||idea.pillar||""}
+Fact it rests on: ${idea.fact||""}
+Caution: ${idea.caution||""}
+Source: ${idea.url||""}
+
+RELATED RESEARCH (use only if relevant; never invent beyond it):
+${researchBrief(12)}
+
+Write ONE post: 900-1,500 characters, line 1 is the hook and must work alone (it gets cut at about 210 characters on desktop, 140 on mobile), short paragraphs with blank lines between, one idea, ends with one specific question or one instruction (not both). Do not put links in the post; they go in the first comment.
+
+Reply with only JSON: {"post": string, "firstComment": string (sources as plain lines starting "Sources:"), "hookId": number, "checks": [strings: anything the writer must verify before posting]}`;
+  try{
+    const out=await S.sample.json(prompt,{cache:false});
+    if(!out||typeof out.post!=="string") throw {code:"invalid_json"};
+    const h=humanize(out.post);
+    const pid="p"+Date.now().toString(36);
+    await writeDoc("posts/"+pid,{id:pid,ideaId:idea.id,title:idea.hook,text:h.text,firstComment:String(out.firstComment||""),hookId:Number(out.hookId)||null,checks:Array.isArray(out.checks)?out.checks.map(String):[],status:"draft",pillar:idea.pillar||"",createdAt:now(),updatedAt:now(),origin:"Generated"});
+    await writeDoc("ideas/"+idea.id,{...idea,status:"drafted",postId:pid});
+    S.current=pid; S.draftFilter="open"; showTab("drafts"); renderDrafts(); toast("Draft ready for review");
+  }catch(e){ msg.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; btn.disabled=false; }
+}
+$("suggestBtn").onclick=async()=>{
+  const btn=$("suggestBtn"), m=$("ideaMsg");
+  if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  const focus=$("ideaFocus").value;
+  btn.disabled=true; m.innerHTML=`<p><span class="thinking">Claude is reading your research and looking for angles…</span></p>`;
+  const existing=S.ideas.map(i=>"- "+i.hook).slice(0,80).join("\n");
+  const prompt=`You suggest LinkedIn post ideas for the Darman.ai company page.
+
+VOICE PROFILE:
+${S.voice.slice(0,7000)}
+
+${RULES}
+
+CONTENT PILLARS (tag each idea with one letter):
+A = Generic AI training isn't enough; specialty-specific is
+B = Access to AI isn't the barrier; knowing when and how to use it is
+C = Limitations of an AI workflow matter as much as the workflow
+D = Doctors learn AI best from doctors
+E = AI literacy is ongoing, not a one-time training day
+
+HOOK FORMULAS:
+${hooksBrief()}
+
+RESEARCH (the only facts you may use):
+${researchBrief(45,focus)}
+
+IDEAS ALREADY IN THE LIST (don't repeat them):
+${existing}
+
+Suggest 5 NEW post ideas${focus?` focused on: ${$("ideaFocus").selectedOptions[0].text}`:""}. Each must rest on one specific fact from RESEARCH, with its source URL copied exactly. Prefer a mix of pillars and of audiences (hospital leaders and practicing doctors).
+
+Reply with only a JSON array of 5 objects: {"hook": string (the first line, under 140 characters), "angle": string (one sentence: what the post argues), "pillar": "A"|"B"|"C"|"D"|"E", "hookId": number, "fact": string (the exact fact used), "url": string, "caution": string (how not to overclaim)}`;
+  try{
+    const arr=await S.sample.json(prompt,{cache:false});
+    if(!Array.isArray(arr)) throw {code:"invalid_json"};
+    let n=0;
+    for(const x of arr.slice(0,6)){
+      if(!x||!x.hook) continue;
+      const id="i"+Date.now().toString(36)+n;
+      await writeDoc("ideas/"+id,{id,hook:String(x.hook),angle:String(x.angle||""),pillar:String(x.pillar||""),hookId:Number(x.hookId)||null,fact:String(x.fact||""),url:String(x.url||""),caution:String(x.caution||""),status:"new",origin:"Suggested",createdAt:now()});
+      n++;
+    }
+    S.ideaFilter="new"; m.innerHTML=""; toast(n+" new ideas added");
+  }catch(e){ m.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; }
+  btn.disabled=false;
+};
+
+/* ---------------- drafts ---------------- */
+function renderDrafts(listOnly){
+  const f=S.draftFilter;
+  const st=p=>p.status||"draft";
+  const counts={open:0,accepted:0,posted:0,rejected:0,all:S.posts.length};
+  S.posts.forEach(p=>{ if(st(p)==="draft") counts.open++; else counts[st(p)]=(counts[st(p)]||0)+1; });
+  $("c-drafts").textContent=counts.open;
+  $("draftFilters").innerHTML=[["open","To review"],["accepted","Accepted"],["posted","Posted"],["rejected","Rejected"],["all","All"]].map(([k,l])=>`<button aria-pressed="${f===k}" data-f="${k}">${l} · ${counts[k]||0}</button>`).join("");
+  $("draftFilters").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(!leaveOk()) return; S.draftFilter=b.dataset.f; renderDrafts(); });
+  const list=S.posts.filter(p=>f==="all"||(f==="open"?st(p)==="draft":st(p)===f)).sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  if(!list.find(p=>p.id===S.current)) S.current=list[0]?.id||null;
+  $("draftList").innerHTML=list.length?list.map(p=>`<button class="row" aria-current="${p.id===S.current}" data-id="${esc(p.id)}"><span class="first">${esc((p.text||"").split("\n")[0]||p.title||"Untitled")}</span><span class="sub"><span class="chip ${esc(st(p))}">${esc({draft:"To review",accepted:"Accepted",posted:"Posted",rejected:"Rejected"}[st(p)])}</span><span>${fmtDate(p.updatedAt)}</span><span class="mono">${(p.text||"").length} ch</span></span></button>`).join(""):`<div class="empty">No drafts here. Generate one from an idea.</div>`;
+  $("draftList").querySelectorAll(".row").forEach(b=>b.onclick=()=>{ if(!leaveOk()) return; S.current=b.dataset.id; renderDrafts(); });
+  const cur=S.posts.find(x=>x.id===S.current);
+  const sig=cur?cur.id+"|"+(cur.status||"draft")+"|"+(cur.checks||[]).length:"";
+  if(listOnly&&S.editorSig===sig&&$("postText")){
+    if(!S.dirty&&document.activeElement!==$("postText")&&cur&&$("postText").value!==cur.text){ $("postText").value=cur.text||""; $("fcText").value=cur.firstComment||""; updateLive(); }
+    return;
+  }
+  S.editorSig=sig;
+  renderEditor();
+}
+function leaveOk(){
+  if(!S.dirty) return true;
+  saveCurrent(); return true;
+}
+function renderEditor(){
+  const p=S.posts.find(x=>x.id===S.current);
+  const w=$("editorWrap");
+  if(!p){ w.innerHTML=`<div class="empty">Select a draft to review it.</div>`; return; }
+  const st=p.status||"draft";
+  w.innerHTML=`<div class="editor">
+    <div class="editor-top">
+      <div class="meta" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="chip ${esc(st)}">${esc({draft:"To review",accepted:"Accepted",posted:"Posted",rejected:"Rejected"}[st])}</span>${p.hookId?`<span class="chip">Hook #${esc(p.hookId)}${HOOKS.hooks[p.hookId-1]?" · "+esc(HOOKS.hooks[p.hookId-1].name):""}</span>`:""}${p.pillar?`<span class="chip pill-${esc(p.pillar)}">${esc(PILLARS[p.pillar]||p.pillar)}</span>`:""}${p.postedAt?`<span class="chip">Posted ${fmtDate(p.postedAt)}</span>`:""}</div>
+      <div class="actions" id="stateBtns"></div>
+    </div>
+    <div class="ed-grid">
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <textarea id="postText" aria-label="Post text">${esc(p.text||"")}</textarea>
+        <div class="counter"><span id="charCount"></span><span id="saveState" class="muted"></span></div>
+        <div class="revise">
+          <input type="text" id="reviseIn" placeholder="Tell Claude what to change, e.g. “shorter, more for hospital leaders”" aria-label="Revision instruction">
+          <button class="btn" id="reviseBtn">Revise</button>
+        </div>
+        <div class="quick" id="quickRev">
+          ${["Make it shorter","Sharper first line","More for hospital leaders","More for practicing doctors","Warmer, less formal"].map(q=>`<button class="btn ghost sm" data-q="${esc(q)}">${esc(q)}</button>`).join("")}
+        </div>
+        <div id="reviseMsg"></div>
+        ${(p.checks&&p.checks.length)?`<div class="notice warn"><b>Check before posting:</b><ul style="margin:6px 0 0;padding-left:18px">${p.checks.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`:""}
+        <label class="f" for="fcText">First comment (sources go here, not in the post)
+          <textarea id="fcText" class="small">${esc(p.firstComment||"")}</textarea>
+        </label>
+        <div class="actions">
+          <button class="btn primary" id="copyPost">Copy post</button>
+          <button class="btn" id="copyFc">Copy first comment</button>
+          <button class="btn ghost" id="toVisual">Make a visual</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+        <div class="panel" id="humanPanel"></div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">How it shows in the feed</div>
+          <div class="preview" id="preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  const ta=$("postText");
+  ta.addEventListener("input",()=>{S.dirty=true;$("saveState").textContent="Unsaved changes";updateLive();});
+  ta.addEventListener("blur",saveCurrent);
+  $("fcText").addEventListener("input",()=>{S.dirty=true;$("saveState").textContent="Unsaved changes";});
+  $("fcText").addEventListener("blur",saveCurrent);
+  $("copyPost").onclick=()=>copyText(ta.value,"Post");
+  $("copyFc").onclick=()=>copyText($("fcText").value,"First comment");
+  $("toVisual").onclick=()=>{ saveCurrent(); S.vis.postId=p.id; S.vis.fields={}; S.vis.slides=[]; showTab("visuals"); };
+  $("reviseBtn").onclick=()=>revise($("reviseIn").value);
+  $("reviseIn").addEventListener("keydown",e=>{ if(e.key==="Enter") revise($("reviseIn").value); });
+  $("quickRev").querySelectorAll("button").forEach(b=>b.onclick=()=>revise(b.dataset.q));
+  renderStateBtns(p);
+  updateLive();
+}
+function renderStateBtns(p){
+  const st=p.status||"draft", el=$("stateBtns");
+  const b=[];
+  if(st==="draft"){ b.push(`<button class="btn bad sm" data-s="rejected">Reject</button>`,`<button class="btn good sm" data-s="accepted">Accept</button>`); }
+  if(st==="accepted"){ b.push(`<button class="btn ghost sm" data-s="draft">Back to review</button>`,`<button class="btn primary sm" data-s="posted">Mark as posted</button>`); }
+  if(st==="rejected"){ b.push(`<button class="btn ghost sm" data-s="draft">Back to review</button>`,`<button class="btn ghost sm" data-del="1">Delete</button>`); }
+  if(st==="posted"){ b.push(`<button class="btn ghost sm" data-s="accepted">Undo posted</button>`); }
+  el.innerHTML=b.join("");
+  el.querySelectorAll("[data-s]").forEach(x=>x.onclick=async()=>{
+    await saveCurrent();
+    const extra={status:x.dataset.s,updatedAt:now()};
+    if(x.dataset.s==="posted") extra.postedAt=now();
+    await writeDoc("posts/"+p.id,{...p,...currentEdits(),...extra});
+    toast({accepted:"Accepted",rejected:"Rejected",posted:"Marked as posted",draft:"Back in review"}[x.dataset.s]);
+  });
+  const d=el.querySelector("[data-del]");
+  if(d) d.onclick=()=>{ el.innerHTML=`<span class="confirm">Delete this draft for good? <button class="btn bad sm" id="yesDel">Delete</button><button class="btn ghost sm" id="noDel">Keep</button></span>`; $("noDel").onclick=()=>renderStateBtns(p); $("yesDel").onclick=async()=>{ try{ await S.db.doc("posts/"+p.id).delete(); toast("Deleted"); }catch(e){ toast("Couldn't delete: "+(e.code||"error")); } }; };
+}
+function currentEdits(){ const ta=$("postText"), fc=$("fcText"); return ta?{text:ta.value,firstComment:fc?fc.value:""}:{}; }
+async function saveCurrent(){
+  if(!S.dirty) return;
+  const p=S.posts.find(x=>x.id===S.current); if(!p) return;
+  S.dirty=false; const st=$("saveState"); if(st) st.textContent="Saving…";
+  await writeDoc("posts/"+p.id,{...p,...currentEdits(),updatedAt:now()});
+  if($("saveState")) $("saveState").textContent="Saved";
+}
+function updateLive(){
+  const t=$("postText").value;
+  const n=t.length;
+  $("charCount").innerHTML=`<span class="mono ${n>3000?"over":""}">${n.toLocaleString()} / 3,000 characters</span><span>${n<900?"Short: 900–1,500 works best":n>1500?"Long: make every line earn it":"Good length"}</span>`;
+  const cut=Math.min(210,t.length); let at=t.lastIndexOf(" ",cut); if(at<120) at=cut; const firstBreak=t.indexOf("\n\n"); const lines=t.slice(0,at).split("\n");
+  let shown=t.slice(0,at); if(lines.length>3){ shown=lines.slice(0,3).join("\n"); }
+  const rest=t.slice(shown.length);
+  $("preview").innerHTML=`<div class="who"><div class="avatar">d</div><div><b>darman.ai</b><span>Hospitals and Health Care</span></div></div><div class="shown">${esc(shown)}</div>${rest.trim()?`<div class="cut">…see more</div><div class="hiddenpart">${esc(rest.trim())}</div>`:""}`;
+  const d=detect(t);
+  const bars=Object.entries(d.r).map(([k,[v,det]])=>`<div class="meter" title="${esc(det)}"><span class="lbl">${esc(k)}</span><span class="bar"><i class="${v<55?"low":v<70?"mid":""}" style="width:${v.toFixed(0)}%"></i></span><span class="mono">${v.toFixed(0)}</span></div>`).join("");
+  $("humanPanel").innerHTML=`<div class="score-head"><div><div class="eyebrow">Human score</div><div class="score-big">${d.overall.toFixed(0)}</div></div><span class="verdict ${d.verdict}">${d.verdict}</span></div>${bars}
+    ${d.flags.length?`<div class="flags">${d.flags.map(f=>`<div><b>${esc(f.name)}</b>${esc(f.fix)}</div>`).join("")}</div>`:""}
+    <button class="btn sm" id="cleanBtn">Clean up wording</button><div class="muted" style="font-size:12px">Removes em dashes, curly quotes, hidden characters and stock phrases. Same rules as /li-human. Local heuristics, not a real AI detector.</div>`;
+  $("cleanBtn").onclick=()=>{ const h=humanize($("postText").value); $("postText").value=h.text; S.dirty=true; updateLive(); saveCurrent(); toast(h.changes?h.changes+" fixes applied":"Nothing to clean"); };
+}
+async function revise(instr){
+  instr=(instr||"").trim(); if(!instr) return;
+  const p=S.posts.find(x=>x.id===S.current); if(!p) return;
+  const m=$("reviseMsg");
+  if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  const btn=$("reviseBtn"); btn.disabled=true; m.innerHTML=`<span class="thinking">Revising…</span>`;
+  const prompt=`Revise this LinkedIn post for the Darman.ai company page.
+
+VOICE PROFILE:
+${S.voice.slice(0,7000)}
+
+${RULES}
+
+INSTRUCTION FROM THE EDITOR: ${instr}
+
+CURRENT POST:
+${$("postText").value}
+
+Keep every fact exactly as it is (don't add new numbers or claims). Keep it under 3,000 characters. Reply with only JSON: {"post": string, "note": string (one line on what you changed)}`;
+  try{
+    const out=await S.sample.json(prompt,{cache:false});
+    if(!out||typeof out.post!=="string") throw {code:"invalid_json"};
+    const h=humanize(out.post);
+    $("postText").value=h.text; S.dirty=true; await saveCurrent(); updateLive();
+    m.innerHTML=out.note?`<div class="muted" style="font-size:13px">${esc(out.note)}</div>`:""; $("reviseIn").value="";
+  }catch(e){ m.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; }
+  btn.disabled=false;
+}
+
+/* ---------------- research ---------------- */
+function renderResearch(){
+  const f=S.resFilter;
+  $("c-research").textContent=S.research.length;
+  const kinds=["all",...Object.keys(KINDS).filter(k=>S.research.some(r=>r.kind===k))];
+  $("resFilters").innerHTML=kinds.map(k=>`<button aria-pressed="${f===k}" data-f="${k}">${k==="all"?"All":KINDS[k]} · ${k==="all"?S.research.length:S.research.filter(r=>r.kind===k).length}</button>`).join("");
+  $("resFilters").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.resFilter=b.dataset.f;renderResearch();});
+  const list=S.research.filter(r=>f==="all"||r.kind===f).sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));
+  $("resList").innerHTML=list.length?list.map(r=>`<div class="res-item"><div><span class="chip">${esc(KINDS[r.kind]||r.kind)}</span>${r.date?`<div class="muted mono" style="font-size:12px;margin-top:6px">${esc(r.date)}</div>`:""}</div><div><h4>${esc(r.title)}</h4><p>${esc(r.summary)}</p>${r.fact?`<p style="margin-top:6px"><b>Usable fact:</b> ${esc(r.fact)}</p>`:""}${r.caution?`<p class="muted" style="margin-top:4px;font-size:12.5px">${esc(r.caution)}</p>`:""}${r.url?`<div class="src" style="margin-top:6px"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,"").slice(0,70))}</a></div>`:""}</div><div></div></div>`).join(""):`<div class="empty">No research yet.</div>`;
+}
+$("analyzeBtn").onclick=async()=>{
+  const text=$("resText").value.trim(), url=$("resUrl").value.trim(), kind=$("resKind").value;
+  const m=$("analyzeMsg"), out=$("analyzeOut");
+  if(!text){ m.innerHTML=`<span class="muted">Paste some text first.</span>`; return; }
+  if(!S.sample){ out.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  const btn=$("analyzeBtn"); btn.disabled=true; m.innerHTML=`<span class="thinking">Claude is reading it…</span>`; out.innerHTML="";
+  const prompt=`You help the person who runs the Darman.ai LinkedIn page. They have NO medical background. Darman.ai teaches physicians to use AI practically and responsibly (short, specialty-specific courses led by doctors, plus a hands-on sandbox).
+
+VOICE PROFILE (for positions and forbidden claims):
+${S.voice.slice(0,6000)}
+
+${RULES}
+
+WHAT THEY PASTED${url?` (link: ${url})`:""}${kind!=="auto"?` (type: ${kind})`:""}:
+"""
+${text.slice(0,20000)}
+"""
+
+1. Explain it in plain English (define any medical term in brackets).
+2. Judge how solid it is: randomized trial / observational study / survey / opinion / press release / vendor claim, with the main weak spot.
+3. Pull the one fact Darman could use, worded exactly as the source supports it.
+4. Suggest up to 3 post ideas for Darman (or none if there's no honest angle).
+
+Reply with only JSON: {"title": string (short), "kind": "hospital"|"government"|"physician"|"study"|"competitor"|"news"|"linkedin", "summary": string (2-4 plain-English sentences), "solid": string (type + weak spot), "fact": string, "caution": string, "date": string (publication date if stated, else ""), "ideas": [{"hook": string, "angle": string, "pillar": "A"|"B"|"C"|"D"|"E", "hookId": number, "fact": string, "caution": string}]}`;
+  try{
+    const r=await S.sample.json(prompt,{cache:false});
+    if(!r||!r.title) throw {code:"invalid_json"};
+    const rid="r"+Date.now().toString(36);
+    await writeDoc("research/"+rid,{id:rid,kind:String(r.kind||kind||"news"),title:String(r.title),summary:String(r.summary||""),fact:String(r.fact||""),caution:[r.solid,r.caution].filter(Boolean).join(" · "),url,date:String(r.date||""),addedAt:now(),origin:"Added"});
+    let n=0;
+    for(const x of (Array.isArray(r.ideas)?r.ideas:[]).slice(0,3)){
+      if(!x||!x.hook) continue; const id="i"+Date.now().toString(36)+n;
+      await writeDoc("ideas/"+id,{id,hook:String(x.hook),angle:String(x.angle||""),pillar:String(x.pillar||""),hookId:Number(x.hookId)||null,fact:String(x.fact||r.fact||""),url,caution:String(x.caution||""),status:"new",origin:"From research",createdAt:now()}); n++;
+    }
+    out.innerHTML=`<div class="notice"><b>${esc(r.title)}</b><p style="margin:6px 0">${esc(r.summary)}</p><p style="margin:0 0 6px"><b>How solid:</b> ${esc(r.solid||"")}</p>${r.fact?`<p style="margin:0"><b>Usable fact:</b> ${esc(r.fact)}</p>`:""}<p style="margin:8px 0 0" class="muted">Saved to Research${n?`, and ${n} idea${n>1?"s":""} added to Ideas`:". No honest post angle found"}.</p></div>`;
+    $("resText").value=""; $("resUrl").value=""; m.innerHTML="";
+  }catch(e){ m.innerHTML=""; out.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; }
+  btn.disabled=false;
+};
+
+/* ---------------- voice ---------------- */
+$("saveVoice").onclick=async()=>{ await writeDoc("config/voice",{text:$("voiceText").value,updatedAt:now()}); toast("Voice saved"); };
+
+/* ---------------- visuals ---------------- */
+const TEMPLATES={
+  stat:{name:"Stat card",desc:"One number that stops the scroll",fields:[["kicker","Label above",""],["number","Big number","72%"],["line","What it means",""],["source","Source line",""]]},
+  hook:{name:"Hook card",desc:"The first line, large",fields:[["kicker","Label above",""],["text","Headline",""],["source","Small print",""]]},
+  evidence:{name:"Evidence card",desc:"Effect, population, caveat",fields:[["kicker","Label above","What the study measured"],["title","Study name",""],["effect","Effect",""],["population","Population",""],["caveat","Caveat",""],["source","Source line",""]]},
+  carousel:{name:"Carousel",desc:"Slides for a document post (PDF)",fields:[]}
+};
+const PAL={light:{bg:"#FBF6EF",ink:"#14202B",muted:"#5F6B74",accent:"#D94A30",soft:"#F3E6D9"},dark:{bg:"#14202B",ink:"#F4EFE8",muted:"#A8B3BA",accent:"#FF7457",soft:"#1E2E3B"}};
+function wrapLines(ctx,text,maxW){
+  const out=[]; for(const para of String(text||"").split("\n")){ const words=para.split(/\s+/).filter(Boolean); let line=""; for(const w of words){ const t=line?line+" "+w:w; if(ctx.measureText(t).width>maxW&&line){ out.push(line); line=w; } else line=t; } out.push(line); } return out;
+}
+function fitText(ctx,text,maxW,maxH,start,min,weight,family,lh=1.12){
+  let size=start; let lines;
+  while(size>=min){ ctx.font=`${weight} ${size}px ${family}`; lines=wrapLines(ctx,text,maxW); if(lines.length*size*lh<=maxH) break; size-=4; }
+  return {size,lines,lh};
+}
+const DISP='"Bricolage Grotesque", sans-serif', BODY='"Hanken Grotesk", sans-serif';
+function drawFrame(ctx,p,page,total){
+  ctx.fillStyle=p.bg; ctx.fillRect(0,0,1080,1350);
+  ctx.fillStyle=p.accent; ctx.fillRect(0,0,1080,14);
+  ctx.font=`800 34px ${DISP}`; ctx.fillStyle=p.ink; ctx.textBaseline="alphabetic";
+  ctx.fillText("darman",80,1270); const w=ctx.measureText("darman").width; ctx.fillStyle=p.accent; ctx.fillText(".ai",80+w,1270);
+  if(total){ ctx.font=`600 26px ${BODY}`; ctx.fillStyle=p.muted; ctx.textAlign="right"; ctx.fillText(`${page} / ${total}`,1000,1270); ctx.textAlign="left"; }
+}
+function drawKicker(ctx,p,text,y){ if(!text) return y; ctx.font=`700 28px ${BODY}`; ctx.fillStyle=p.accent; const t=text.toUpperCase(); let x=80; for(const ch of t){ ctx.fillText(ch,x,y); x+=ctx.measureText(ch).width+2.5; } return y+60; }
+function drawSource(ctx,p,text){ if(!text) return; ctx.font=`500 26px ${BODY}`; ctx.fillStyle=p.muted; const lines=wrapLines(ctx,text,920).slice(0,3); lines.forEach((l,i)=>ctx.fillText(l,80,1150-(lines.length-1-i)*34)); }
+function drawSlide(ctx,slide,page,total){
+  const p=PAL[S.vis.theme]; drawFrame(ctx,p,page,total);
+  const t=slide.type;
+  if(t==="stat"){
+    let y=drawKicker(ctx,p,slide.kicker,200);
+    const num=fitText(ctx,slide.number,920,380,300,120,800,DISP,1);
+    ctx.fillStyle=p.accent; ctx.font=`800 ${num.size}px ${DISP}`; num.lines.slice(0,2).forEach((l,i)=>ctx.fillText(l,74,y+num.size*0.82+i*num.size)); y+=num.size*num.lines.slice(0,2).length+50;
+    const ln=fitText(ctx,slide.line,920,1080-y,64,34,700,DISP,1.18); ctx.fillStyle=p.ink; ctx.font=`700 ${ln.size}px ${DISP}`; ln.lines.forEach((l,i)=>ctx.fillText(l,80,y+ln.size+i*ln.size*ln.lh));
+    drawSource(ctx,p,slide.source);
+  } else if(t==="hook"||t==="cover"||t==="point"||t==="cta"){
+    let y=drawKicker(ctx,p,slide.kicker,t==="cover"?260:200);
+    const big=fitText(ctx,slide.text,920,t==="point"?420:700,t==="cover"?110:96,40,800,DISP,1.1); ctx.fillStyle=t==="cta"?p.accent:p.ink; ctx.font=`800 ${big.size}px ${DISP}`; big.lines.forEach((l,i)=>ctx.fillText(l,78,y+big.size*0.9+i*big.size*big.lh)); y+=big.lines.length*big.size*big.lh+50;
+    if(slide.body){ const b=fitText(ctx,slide.body,920,1080-y,46,28,500,BODY,1.35); ctx.fillStyle=p.muted; ctx.font=`500 ${b.size}px ${BODY}`; b.lines.forEach((l,i)=>ctx.fillText(l,80,y+b.size+i*b.size*b.lh)); }
+    drawSource(ctx,p,slide.source);
+  } else if(t==="evidence"){
+    let y=drawKicker(ctx,p,slide.kicker,190);
+    const tt=fitText(ctx,slide.title,920,240,72,40,800,DISP,1.1); ctx.fillStyle=p.ink; ctx.font=`800 ${tt.size}px ${DISP}`; tt.lines.forEach((l,i)=>ctx.fillText(l,78,y+tt.size*0.9+i*tt.size*tt.lh)); y+=tt.lines.length*tt.size*tt.lh+40;
+    const rows=[["EFFECT",slide.effect],["POPULATION",slide.population],["CAVEAT",slide.caveat]];
+    const rowH=(1080-y)/3;
+    rows.forEach(([lab,val],i)=>{ const ry=y+i*rowH; ctx.fillStyle=p.soft; ctx.fillRect(80,ry,920,rowH-24); ctx.fillStyle=i===2?p.accent:p.muted; ctx.font=`700 24px ${BODY}`; ctx.fillText(lab,110,ry+50); const v=fitText(ctx,val,860,rowH-110,44,26,600,BODY,1.25); ctx.fillStyle=p.ink; ctx.font=`600 ${v.size}px ${BODY}`; v.lines.forEach((l,j)=>ctx.fillText(l,110,ry+70+v.size+j*v.size*v.lh)); });
+    drawSource(ctx,p,slide.source);
+  } else if(t==="recap"){
+    let y=drawKicker(ctx,p,slide.kicker||"In short",200);
+    const items=(slide.items||[]).slice(0,6); ctx.fillStyle=p.ink;
+    const hh=(1060-y)/Math.max(items.length,1);
+    items.forEach((it,i)=>{ const ry=y+i*hh; ctx.fillStyle=p.accent; ctx.font=`800 44px ${DISP}`; ctx.fillText(String(i+1),80,ry+48); const v=fitText(ctx,it,820,hh-20,44,26,600,BODY,1.25); ctx.fillStyle=p.ink; ctx.font=`600 ${v.size}px ${BODY}`; v.lines.forEach((l,j)=>ctx.fillText(l,160,ry+44+j*v.size*v.lh)); });
+    drawSource(ctx,p,slide.source);
+  }
+}
+function visSlides(){
+  const f=S.vis.fields, t=S.vis.template;
+  if(t==="carousel") return S.vis.slides;
+  if(t==="stat") return [{type:"stat",...f}];
+  if(t==="hook") return [{type:"hook",...f}];
+  return [{type:"evidence",...f}];
+}
+function renderVisuals(){
+  const posts=S.posts.filter(p=>(p.status||"draft")!=="rejected");
+  if(!S.vis.postId||!posts.find(p=>p.id===S.vis.postId)) S.vis.postId=posts[0]?.id||null;
+  const post=posts.find(p=>p.id===S.vis.postId);
+  const tm=TEMPLATES[S.vis.template];
+  if(post&&post.visual&&!Object.keys(S.vis.fields).length&&!S.vis.slides.length&&post.visual.template===S.vis.template){ S.vis.fields={...(post.visual.fields||{})}; S.vis.slides=(post.visual.slides||[]).map(s=>({...s})); }
+  $("visFields").innerHTML=`
+    <label class="f" for="visPost">Draft<select id="visPost">${posts.map(p=>`<option value="${esc(p.id)}" ${p.id===S.vis.postId?"selected":""}>${esc(((p.text||p.title||"").split("\n")[0]).slice(0,80))}</option>`).join("")}</select></label>
+    <div class="tmpl" role="group" aria-label="Template">${Object.entries(TEMPLATES).map(([k,v])=>`<button aria-pressed="${k===S.vis.template}" data-t="${k}"><b>${v.name}</b><span>${v.desc}</span></button>`).join("")}</div>
+    <div class="actions"><button class="btn primary" id="visSuggest" ${post?"":"disabled"}>Suggest with Claude</button><select id="visTheme" aria-label="Colors" style="width:auto"><option value="light" ${S.vis.theme==="light"?"selected":""}>Cream</option><option value="dark" ${S.vis.theme==="dark"?"selected":""}>Ink</option></select></div>
+    <div id="visMsg"></div>
+    <div class="fields" id="visInputs"></div>`;
+  $("visPost").onchange=e=>{S.vis.postId=e.target.value;S.vis.fields={};S.vis.slides=[];renderVisuals();};
+  $("visTheme").onchange=e=>{S.vis.theme=e.target.value;drawStage();};
+  $("visFields").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{S.vis.template=b.dataset.t;S.vis.fields={};S.vis.slides=[];S.vis.slide=0;renderVisuals();});
+  $("visSuggest").onclick=suggestVisual;
+  const inp=$("visInputs");
+  if(S.vis.template!=="carousel"){
+    inp.innerHTML=tm.fields.map(([k,l,ph])=>`<label class="f" for="vf-${k}">${l}${k==="text"||k==="line"||k==="caveat"?`<textarea id="vf-${k}" class="small" data-k="${k}" placeholder="${esc(ph)}">${esc(S.vis.fields[k]??"")}</textarea>`:`<input type="text" id="vf-${k}" data-k="${k}" placeholder="${esc(ph)}" value="${esc(S.vis.fields[k]??"")}">`}</label>`).join("");
+  } else {
+    const sl=S.vis.slides[S.vis.slide];
+    inp.innerHTML=S.vis.slides.length?`<div class="eyebrow">Slide ${S.vis.slide+1} of ${S.vis.slides.length} · ${esc(sl.type)}</div>
+      <label class="f" for="vf-kicker">Label above<input type="text" id="vf-kicker" data-k="kicker" value="${esc(sl.kicker||"")}"></label>
+      ${sl.type==="recap"?`<label class="f" for="vf-items">Points, one per line<textarea id="vf-items" class="small" data-k="items">${esc((sl.items||[]).join("\n"))}</textarea></label>`:`<label class="f" for="vf-text">Headline<textarea id="vf-text" class="small" data-k="text">${esc(sl.text||"")}</textarea></label><label class="f" for="vf-body">Supporting line<textarea id="vf-body" class="small" data-k="body">${esc(sl.body||"")}</textarea></label>`}
+      <label class="f" for="vf-source">Small print<input type="text" id="vf-source" data-k="source" value="${esc(sl.source||"")}"></label>`
+      :`<div class="empty">Press “Suggest with Claude” to turn this draft into 6–9 slides.</div>`;
+  }
+  inp.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{
+    const k=el.dataset.k;
+    if(S.vis.template==="carousel"){ const sl=S.vis.slides[S.vis.slide]; sl[k]= k==="items"?el.value.split("\n").filter(Boolean):el.value; } else S.vis.fields[k]=el.value;
+    drawStage();
+  }));
+  drawStage();
+}
+function drawStage(){
+  const st=$("visStage"); const slides=visSlides();
+  if(!slides.length){ st.innerHTML=`<div class="empty" style="width:100%">Nothing to draw yet.</div>`; return; }
+  const i=Math.min(S.vis.slide,slides.length-1);
+  st.innerHTML=`<canvas id="visCanvas" width="1080" height="1350" aria-label="Visual preview"></canvas>
+    ${slides.length>1?`<div class="thumbs" id="thumbs">${slides.map((s,j)=>`<button aria-current="${j===i}" data-j="${j}" aria-label="Slide ${j+1}"><canvas width="1080" height="1350"></canvas></button>`).join("")}</div>`:""}
+    <div class="actions"><button class="btn primary" id="savePng">Save image${slides.length>1?"s (PNG)":" (PNG)"}</button>${slides.length>1?`<button class="btn" id="savePdf">Save as PDF</button>`:""}<button class="btn ghost" id="keepVis">Keep with draft</button></div>
+    <div class="muted" style="font-size:12.5px;text-align:center;max-width:420px">Upload the PNG with your post, or the PDF as a LinkedIn document post. Studio doesn't upload anything.</div>`;
+  const draw=()=>{
+    drawSlide($("visCanvas").getContext("2d"),slides[i],slides.length>1?i+1:0,slides.length>1?slides.length:0);
+    if(slides.length>1) $("thumbs").querySelectorAll("canvas").forEach((c,j)=>drawSlide(c.getContext("2d"),slides[j],j+1,slides.length));
+  };
+  document.fonts.ready.then(draw);
+  if(slides.length>1) $("thumbs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.vis.slide=Number(b.dataset.j);renderVisuals();});
+  $("savePng").onclick=savePngs; const pdf=$("savePdf"); if(pdf) pdf.onclick=savePdf;
+  $("keepVis").onclick=async()=>{ const p=S.posts.find(x=>x.id===S.vis.postId); if(!p) return; await writeDoc("posts/"+p.id,{...p,visual:{template:S.vis.template,fields:S.vis.fields,slides:S.vis.slides,theme:S.vis.theme},updatedAt:now()}); toast("Visual kept with the draft"); };
+}
+function slideCanvas(s,j,total){ const c=document.createElement("canvas"); c.width=1080;c.height=1350; drawSlide(c.getContext("2d"),s,total>1?j+1:0,total>1?total:0); return c; }
+const toBlob=c=>new Promise(r=>c.toBlob(r,"image/png"));
+async function savePngs(){
+  if(!S.downloads){ toast("Saving files isn't available in this view"); return; }
+  const slides=visSlides();
+  for(let j=0;j<slides.length;j++){
+    const blob=await toBlob(slideCanvas(slides[j],j,slides.length));
+    try{ await S.downloads.save({filename:`darman-${S.vis.template}${slides.length>1?"-"+(j+1):""}.png`,data:blob}); }
+    catch(e){ if(e.code==="declined") return; toast("Couldn't save: "+(e.code||"error")); return; }
+  }
+}
+async function savePdf(){
+  if(!S.downloads){ toast("Saving files isn't available in this view"); return; }
+  if(!window.jspdf){ toast("PDF maker didn't load. Save PNGs instead."); return; }
+  const slides=visSlides(); const doc=new window.jspdf.jsPDF({unit:"px",format:[1080,1350],hotfixes:["px_scaling"]});
+  slides.forEach((s,j)=>{ if(j) doc.addPage([1080,1350]); doc.addImage(slideCanvas(s,j,slides.length).toDataURL("image/jpeg",0.92),"JPEG",0,0,1080,1350); });
+  try{ await S.downloads.save({filename:"darman-carousel.pdf",data:doc.output("blob")}); }catch(e){ if(e.code!=="declined") toast("Couldn't save: "+(e.code||"error")); }
+}
+async function suggestVisual(){
+  const post=S.posts.find(p=>p.id===S.vis.postId); const m=$("visMsg");
+  if(!post) return; if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  const t=S.vis.template, btn=$("visSuggest"); btn.disabled=true; m.innerHTML=`<span class="thinking">Claude is designing the words for the visual…</span>`;
+  const shapes={
+    stat:`{"kicker": string (3-5 words), "number": string (ONE number that appears in the post, e.g. "9 of 20" or "72%"), "line": string (under 90 characters: what it means), "source": string (short source, e.g. "Ontario Auditor General, 2026")}`,
+    hook:`{"kicker": string (3-5 words), "text": string (the hook, under 110 characters), "source": string (optional small print or "")}`,
+    evidence:`{"kicker": string, "title": string (study name, under 60 characters), "effect": string (under 90 characters), "population": string (under 90 characters), "caveat": string (under 110 characters), "source": string}`,
+    carousel:`{"slides": [ {"type":"cover","kicker":string,"text":string (6 words or fewer),"body":string (one line of promise)}, then 4-6 {"type":"point","kicker":string (e.g. "1 · The tool"),"text":string (3-8 words),"body":string (at most 25 words),"source":string or ""}, then {"type":"recap","kicker":"In short","items":[3-5 strings under 60 characters]}, then {"type":"cta","text":string (one action, e.g. "Follow darman.ai for more"),"body":string or ""} ]}`
+  };
+  const prompt=`Design the words for a LinkedIn visual (1080x1350) for the Darman.ai page, based on this post. Use only facts and numbers that appear in the post; never add new ones. Plain, confident, no hype, no emoji.
+
+POST:
+${post.text}
+
+${t==="carousel"?"Make a carousel (document post). One idea per slide, and it must follow the post's argument.":"Template: "+TEMPLATES[t].name+"."}
+
+Reply with only JSON: ${shapes[t]}`;
+  try{
+    const out=await S.sample.json(prompt,{cache:false});
+    if(t==="carousel"){ if(!out||!Array.isArray(out.slides)) throw {code:"invalid_json"}; S.vis.slides=out.slides.slice(0,10).map(s=>({type:String(s.type||"point"),kicker:String(s.kicker||""),text:String(s.text||""),body:String(s.body||""),source:String(s.source||""),items:Array.isArray(s.items)?s.items.map(String):[]})); S.vis.slide=0; }
+    else { if(!out||typeof out!=="object") throw {code:"invalid_json"}; S.vis.fields=Object.fromEntries(Object.entries(out).map(([k,v])=>[k,String(v??"")])); }
+    m.innerHTML=""; renderVisuals();
+  }catch(e){ m.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; btn.disabled=false; }
+}
+
+/* ---------------- db wiring ---------------- */
+async function writeDoc(path,data){
+  if(!S.db){ toast("Saving isn't available in this view"); return false; }
+  try{ const clean=JSON.parse(JSON.stringify(data)); await S.db.doc(path).set(clean); return true; }
+  catch(e){
+    if(e.code==="invalid_argument"){ toast("You have view-only access, so changes can't be saved."); }
+    else if(e.code==="quota_exceeded"){ toast("Studio's storage is full. Delete old rejected drafts."); }
+    else toast("Couldn't save. Try again.");
+    return false;
+  }
+}
+function setStatus(ok,text){ $("dbDot").className="dot "+(ok?"on":"off"); $("statusText").textContent=text; }
+async function boot(){
+  try{ const t=localStorage.getItem("studio.tab"); if(t&&t!=="ideas") showTab(t); }catch(e){}
+  renderIdeas(); renderDrafts(); renderResearch();
+  const use=n=>(window.claude&&window.claude.use)?window.claude.use(n):Promise.resolve(null);
+  const [db,sample,downloads]=await Promise.all([use("db"),use("sample"),use("downloads")]);
+  S.sample=sample; S.downloads=downloads; S.db=db;
+  if(!db){ setStatus(false,"Offline copy: open Studio in claude.ai to load your drafts"); $("banner").innerHTML=`<div class="notice warn" style="margin-bottom:16px">This copy can't reach Studio's saved data. Open it from claude.ai while signed in.</div>`; return; }
+  setStatus(true, sample?"Synced · Claude ready":"Synced · Claude unavailable");
+  const onErr=e=>{ if(e.code==="revoked") setStatus(false,"Access changed. Reload the page."); };
+  db.collection("ideas").onSnapshot(s=>{ S.ideas=s.docs.map(d=>({id:d.id,...d.data()})); renderIdeas(); },onErr);
+  db.collection("posts").onSnapshot(s=>{
+    S.posts=s.docs.map(d=>({id:d.id,...d.data()}));
+    renderDrafts(true);
+    if(S.tab==="visuals"&&!document.activeElement?.closest?.("#visFields")) renderVisuals();
+  },onErr);
+  db.collection("research").onSnapshot(s=>{ S.research=s.docs.map(d=>({id:d.id,...d.data()})); renderResearch(); },onErr);
+  db.doc("config/voice").onSnapshot(s=>{ S.voice=(s.exists&&s.data().text)||""; if(document.activeElement!==$("voiceText")) $("voiceText").value=S.voice; },onErr);
+}
+window.addEventListener("pagehide",()=>{ if(S.dirty) saveCurrent(); });
+boot();
+</script>
