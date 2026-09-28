@@ -1,43 +1,44 @@
 <title>Darman Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Instrument+Sans:wght@500;600;700&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root{
-  --bg:#F4F6F5; --surface:#FFFFFF; --sunk:#EBEFEE; --line:#D9E0DE; --line-strong:#B9C4C1;
-  --ink:#14202B; --ink-2:#3E4B55; --muted:#6B7680;
-  --coral:#D94A30; --coral-ink:#FFFFFF; --coral-soft:#FBE3DC;
-  --good:#1F7A5C; --good-soft:#DDF1E8; --warn:#9A6A0B; --warn-soft:#F7ECD2; --bad:#B3261E; --bad-soft:#F9DEDC;
-  --focus:#2563EB;
-  --shadow:0 1px 2px rgba(20,32,43,.06),0 8px 24px -12px rgba(20,32,43,.18);
-  --display:"Bricolage Grotesque","Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --bg:#FCF5EA; --surface:#FFFDF9; --sunk:#F6ECDD; --line:#EADCC8; --line-strong:#D6C3A9;
+  --ink:#171514; --ink-2:#433E38; --muted:#77706A;
+  --coral:#FD7550; --coral-ink:#171514; --coral-text:#C0431C; --coral-soft:#FFE2D6;
+  --good:#1E7A55; --good-soft:#DCF0E4; --warn:#94630A; --warn-soft:#F8EACB; --bad:#B3261E; --bad-soft:#F9DEDA;
+  --focus:#1D4ED8;
+  --shadow:0 1px 2px rgba(23,21,20,.06),0 8px 24px -12px rgba(23,21,20,.18);
+  --display:"Instrument Sans","Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
   --body:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --script:"Allura","Snell Roundhand","Brush Script MT",cursive;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#0E1418; --surface:#151E24; --sunk:#10181D; --line:#26323A; --line-strong:#3A4852;
-    --ink:#E6ECEE; --ink-2:#B7C2C8; --muted:#8C99A1;
-    --coral:#FF7457; --coral-ink:#1A0B07; --coral-soft:#3A1E17;
+    --bg:#15120F; --surface:#1E1A16; --sunk:#110F0C; --line:#302A24; --line-strong:#473F37;
+    --ink:#F6EEE3; --ink-2:#CFC5B8; --muted:#9A9087;
+    --coral:#FD7550; --coral-ink:#171514; --coral-text:#FF9373; --coral-soft:#3A2119;
     --good:#5DCB9F; --good-soft:#12302A; --warn:#E9B84E; --warn-soft:#33280F; --bad:#FF8A80; --bad-soft:#3A1A18;
-    --focus:#7AA7FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+    --focus:#8AB4FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0E1418; --surface:#151E24; --sunk:#10181D; --line:#26323A; --line-strong:#3A4852;
-  --ink:#E6ECEE; --ink-2:#B7C2C8; --muted:#8C99A1;
-  --coral:#FF7457; --coral-ink:#1A0B07; --coral-soft:#3A1E17;
+  --bg:#15120F; --surface:#1E1A16; --sunk:#110F0C; --line:#302A24; --line-strong:#473F37;
+  --ink:#F6EEE3; --ink-2:#CFC5B8; --muted:#9A9087;
+  --coral:#FD7550; --coral-ink:#171514; --coral-text:#FF9373; --coral-soft:#3A2119;
   --good:#5DCB9F; --good-soft:#12302A; --warn:#E9B84E; --warn-soft:#33280F; --bad:#FF8A80; --bad-soft:#3A1A18;
-  --focus:#7AA7FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  --focus:#8AB4FF; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
 body{color:var(--ink);font:15px/1.55 var(--body);padding-inline:16px;padding-block:0 48px}
 .wrap{max-width:1180px;margin:0 auto}
 h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
-a{color:var(--coral)}
+a{color:var(--coral-text)}
 button,input,textarea,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -48,8 +49,9 @@ button,input,textarea,select{font:inherit;color:inherit}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:12px 16px 0}
 .top-row{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
 .brand{display:flex;align-items:baseline;gap:10px}
-.brand h1{font-size:22px;font-weight:800}
-.brand h1 b{color:var(--coral);font-weight:800}
+.brand h1{font-size:22px;font-weight:700;display:flex;align-items:baseline;gap:6px}
+.brand h1 .mark{width:14px;height:14px;border-radius:50%;background:var(--coral);align-self:center}
+.brand h1 em{font-family:var(--script);font-style:normal;font-weight:400;font-size:30px;color:var(--coral-text);line-height:1}
 .brand span{font-size:13px;color:var(--muted)}
 .status{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
@@ -82,7 +84,7 @@ main{padding-top:22px}
 .chip.accepted{background:var(--good-soft);color:var(--good);border-color:transparent}
 .chip.rejected{background:var(--bad-soft);color:var(--bad);border-color:transparent}
 .chip.posted{background:var(--ink);color:var(--bg);border-color:transparent}
-.chip.pill-A,.chip.pill-B,.chip.pill-C,.chip.pill-D,.chip.pill-E{background:var(--coral-soft);color:var(--coral);border-color:transparent}
+.chip.pill-A,.chip.pill-B,.chip.pill-C,.chip.pill-D,.chip.pill-E{background:var(--coral-soft);color:var(--coral-text);border-color:transparent}
 
 .notice{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--ink-2)}
 .notice.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
@@ -123,11 +125,11 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:60
 /* feed preview: the LinkedIn "see more" cut */
 .preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:14px}
 .preview .who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-.avatar{width:36px;height:36px;border-radius:8px;background:var(--coral);color:var(--coral-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.avatar{width:36px;height:36px;border-radius:8px;background:var(--coral);color:var(--coral-ink);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px}
 .preview .who b{display:block;font-size:14px}
 .preview .who span{font-size:12px;color:var(--muted)}
 .preview .shown{white-space:pre-wrap;font-size:14px;line-height:1.5}
-.preview .cut{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:11.5px;color:var(--coral);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.preview .cut{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:11.5px;color:var(--coral-text);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .preview .cut::before,.preview .cut::after{content:"";flex:1;border-top:1px dashed var(--coral)}
 .preview .hiddenpart{white-space:pre-wrap;font-size:14px;line-height:1.5;color:var(--muted);max-height:120px;overflow:hidden;mask-image:linear-gradient(#000 40%,transparent)}
 
@@ -194,7 +196,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
 
 <div class="top">
   <div class="top-row">
-    <div class="brand"><h1>darman<b>.</b>studio</h1><span>LinkedIn writing desk for Darman.ai</span></div>
+    <div class="brand"><h1><span class="mark" aria-hidden="true"></span>darman.ai <em>studio</em></h1><span>LinkedIn writing desk</span></div>
     <div class="status" id="status"><span class="dot" id="dbDot"></span><span id="statusText">Connecting…</span></div>
   </div>
   <nav class="tabs" role="tablist" aria-label="Sections">
@@ -757,51 +759,75 @@ const TEMPLATES={
   evidence:{name:"Evidence card",desc:"Effect, population, caveat",fields:[["kicker","Label above","What the study measured"],["title","Study name",""],["effect","Effect",""],["population","Population",""],["caveat","Caveat",""],["source","Source line",""]]},
   carousel:{name:"Carousel",desc:"Slides for a document post (PDF)",fields:[]}
 };
-const PAL={light:{bg:"#FBF6EF",ink:"#14202B",muted:"#5F6B74",accent:"#D94A30",soft:"#F3E6D9"},dark:{bg:"#14202B",ink:"#F4EFE8",muted:"#A8B3BA",accent:"#FF7457",soft:"#1E2E3B"}};
-function wrapLines(ctx,text,maxW){
-  const out=[]; for(const para of String(text||"").split("\n")){ const words=para.split(/\s+/).filter(Boolean); let line=""; for(const w of words){ const t=line?line+" "+w:w; if(ctx.measureText(t).width>maxW&&line){ out.push(line); line=w; } else line=t; } out.push(line); } return out;
+const PAL={
+  light:{bg:"#FCF5EA",ink:"#171514",muted:"#6F6862",accent:"#FD7550",script:"#E8603A",soft:"#F7E7D6",wash:"rgba(253,117,80,0.20)"},
+  dark:{bg:"#171514",ink:"#FCF5EA",muted:"#B3A99E",accent:"#FD7550",script:"#FD7550",soft:"#27221E",wash:"rgba(253,117,80,0.16)"}
+};
+const DISP='"Instrument Sans", "Hanken Grotesk", sans-serif', BODY='"Hanken Grotesk", sans-serif', SCRIPT='"Allura", cursive';
+/* Text with *one word* marked renders that word in Darman's coral script, like the page banner. */
+function tokens(text){ const out=[]; String(text||"").split("\n").forEach((line,li)=>{ if(li) out.push({br:true}); const re=/\*([^*]+)\*|(\S+)/g; let m; while((m=re.exec(line))){ if(m[1]) m[1].split(/\s+/).filter(Boolean).forEach(w=>out.push({w,s:true})); else out.push({w:m[2],s:false}); } }); return out; }
+const plain=t=>String(t||"").replace(/\*/g,"");
+function fontFor(tok,size,weight,family){ return tok.s?`400 ${Math.round(size*1.32)}px ${SCRIPT}`:`${weight} ${size}px ${family}`; }
+function layout(ctx,text,maxW,size,weight,family){
+  const lines=[[]]; let x=0; const space=()=>{ ctx.font=`${weight} ${size}px ${family}`; return ctx.measureText(" ").width; };
+  const sp=space();
+  for(const tk of tokens(text)){
+    if(tk.br){ lines.push([]); x=0; continue; }
+    ctx.font=fontFor(tk,size,weight,family); const w=ctx.measureText(tk.w).width;
+    const line=lines[lines.length-1];
+    if(line.length&&x+sp+w>maxW){ lines.push([{...tk,w0:w}]); x=w; }
+    else { x+= (line.length?sp:0)+w; line.push({...tk,w0:w}); }
+  }
+  return {lines,sp};
 }
-function fitText(ctx,text,maxW,maxH,start,min,weight,family,lh=1.12){
-  let size=start; let lines;
-  while(size>=min){ ctx.font=`${weight} ${size}px ${family}`; lines=wrapLines(ctx,text,maxW); if(lines.length*size*lh<=maxH) break; size-=4; }
-  return {size,lines,lh};
+function fitRich(ctx,text,maxW,maxH,start,min,weight,family,lh=1.12){
+  let size=start,L;
+  while(size>=min){ L=layout(ctx,text,maxW,size,weight,family); if(L.lines.length*size*lh<=maxH) break; size-=4; }
+  return {size,lines:L.lines,sp:L.sp,lh};
 }
-const DISP='"Bricolage Grotesque", sans-serif', BODY='"Hanken Grotesk", sans-serif';
+function drawRich(ctx,fit,x,y,color,scriptColor,weight,family,maxLines=99){
+  fit.lines.slice(0,maxLines).forEach((line,i)=>{
+    let cx=x; const by=y+fit.size*0.9+i*fit.size*fit.lh;
+    line.forEach((tk,j)=>{ ctx.font=fontFor(tk,fit.size,weight,family); ctx.fillStyle=tk.s?scriptColor:color; ctx.fillText(tk.w,cx,by+(tk.s?fit.size*0.06:0)); cx+=tk.w0+fit.sp; });
+  });
+  return y+Math.min(fit.lines.length,maxLines)*fit.size*fit.lh;
+}
 function drawFrame(ctx,p,page,total){
   ctx.fillStyle=p.bg; ctx.fillRect(0,0,1080,1350);
-  ctx.fillStyle=p.accent; ctx.fillRect(0,0,1080,14);
-  ctx.font=`800 34px ${DISP}`; ctx.fillStyle=p.ink; ctx.textBaseline="alphabetic";
-  ctx.fillText("darman",80,1270); const w=ctx.measureText("darman").width; ctx.fillStyle=p.accent; ctx.fillText(".ai",80+w,1270);
+  const g=ctx.createLinearGradient(0,0,260,0); g.addColorStop(0,p.wash); g.addColorStop(1,"rgba(253,117,80,0)");
+  ctx.fillStyle=g; ctx.fillRect(0,0,260,1350);
+  ctx.fillStyle=p.accent; ctx.beginPath(); ctx.arc(92,1258,13,0,Math.PI*2); ctx.fill();
+  ctx.font=`700 34px ${DISP}`; ctx.fillStyle=p.ink; ctx.textBaseline="alphabetic"; ctx.fillText("darman.ai",118,1270);
   if(total){ ctx.font=`600 26px ${BODY}`; ctx.fillStyle=p.muted; ctx.textAlign="right"; ctx.fillText(`${page} / ${total}`,1000,1270); ctx.textAlign="left"; }
 }
-function drawKicker(ctx,p,text,y){ if(!text) return y; ctx.font=`700 28px ${BODY}`; ctx.fillStyle=p.accent; const t=text.toUpperCase(); let x=80; for(const ch of t){ ctx.fillText(ch,x,y); x+=ctx.measureText(ch).width+2.5; } return y+60; }
-function drawSource(ctx,p,text){ if(!text) return; ctx.font=`500 26px ${BODY}`; ctx.fillStyle=p.muted; const lines=wrapLines(ctx,text,920).slice(0,3); lines.forEach((l,i)=>ctx.fillText(l,80,1150-(lines.length-1-i)*34)); }
+function drawKicker(ctx,p,text,y){ if(!text) return y; ctx.font=`700 27px ${BODY}`; ctx.fillStyle=p.muted; const t=plain(text).toUpperCase(); let x=80; for(const ch of t){ ctx.fillText(ch,x,y); x+=ctx.measureText(ch).width+3; } ctx.fillStyle=p.accent; ctx.fillRect(80,y+18,56,5); return y+70; }
+function drawSource(ctx,p,text){ if(!text) return; ctx.font=`500 25px ${BODY}`; ctx.fillStyle=p.muted; const lines=layout(ctx,plain(text),920,25,500,BODY).lines.map(l=>l.map(t=>t.w).join(" ")).slice(0,3); lines.forEach((l,i)=>ctx.fillText(l,80,1170-(lines.length-1-i)*33)); }
 function drawSlide(ctx,slide,page,total){
   const p=PAL[S.vis.theme]; drawFrame(ctx,p,page,total);
   const t=slide.type;
   if(t==="stat"){
-    let y=drawKicker(ctx,p,slide.kicker,200);
-    const num=fitText(ctx,slide.number,920,380,300,120,800,DISP,1);
-    ctx.fillStyle=p.accent; ctx.font=`800 ${num.size}px ${DISP}`; num.lines.slice(0,2).forEach((l,i)=>ctx.fillText(l,74,y+num.size*0.82+i*num.size)); y+=num.size*num.lines.slice(0,2).length+50;
-    const ln=fitText(ctx,slide.line,920,1080-y,64,34,700,DISP,1.18); ctx.fillStyle=p.ink; ctx.font=`700 ${ln.size}px ${DISP}`; ln.lines.forEach((l,i)=>ctx.fillText(l,80,y+ln.size+i*ln.size*ln.lh));
+    let y=drawKicker(ctx,p,slide.kicker,190);
+    const num=fitRich(ctx,plain(slide.number),920,400,300,110,700,DISP,1);
+    y=drawRich(ctx,num,74,y,p.accent,p.script,700,DISP,2)+40;
+    const ln=fitRich(ctx,slide.line,920,1090-y,66,34,700,DISP,1.16); drawRich(ctx,ln,80,y,p.ink,p.script,700,DISP);
     drawSource(ctx,p,slide.source);
   } else if(t==="hook"||t==="cover"||t==="point"||t==="cta"){
-    let y=drawKicker(ctx,p,slide.kicker,t==="cover"?260:200);
-    const big=fitText(ctx,slide.text,920,t==="point"?420:700,t==="cover"?110:96,40,800,DISP,1.1); ctx.fillStyle=t==="cta"?p.accent:p.ink; ctx.font=`800 ${big.size}px ${DISP}`; big.lines.forEach((l,i)=>ctx.fillText(l,78,y+big.size*0.9+i*big.size*big.lh)); y+=big.lines.length*big.size*big.lh+50;
-    if(slide.body){ const b=fitText(ctx,slide.body,920,1080-y,46,28,500,BODY,1.35); ctx.fillStyle=p.muted; ctx.font=`500 ${b.size}px ${BODY}`; b.lines.forEach((l,i)=>ctx.fillText(l,80,y+b.size+i*b.size*b.lh)); }
+    let y=drawKicker(ctx,p,slide.kicker,t==="cover"?250:190);
+    const big=fitRich(ctx,slide.text,920,t==="point"?420:700,t==="cover"?112:98,40,700,DISP,1.1);
+    y=drawRich(ctx,big,78,y,p.ink,p.script,700,DISP)+44;
+    if(slide.body){ const b=fitRich(ctx,slide.body,920,1090-y,46,28,500,BODY,1.35); drawRich(ctx,b,80,y,p.muted,p.script,500,BODY); }
     drawSource(ctx,p,slide.source);
   } else if(t==="evidence"){
-    let y=drawKicker(ctx,p,slide.kicker,190);
-    const tt=fitText(ctx,slide.title,920,240,72,40,800,DISP,1.1); ctx.fillStyle=p.ink; ctx.font=`800 ${tt.size}px ${DISP}`; tt.lines.forEach((l,i)=>ctx.fillText(l,78,y+tt.size*0.9+i*tt.size*tt.lh)); y+=tt.lines.length*tt.size*tt.lh+40;
+    let y=drawKicker(ctx,p,slide.kicker,180);
+    const tt=fitRich(ctx,slide.title,920,240,74,40,700,DISP,1.1); y=drawRich(ctx,tt,78,y,p.ink,p.script,700,DISP)+36;
     const rows=[["EFFECT",slide.effect],["POPULATION",slide.population],["CAVEAT",slide.caveat]];
-    const rowH=(1080-y)/3;
-    rows.forEach(([lab,val],i)=>{ const ry=y+i*rowH; ctx.fillStyle=p.soft; ctx.fillRect(80,ry,920,rowH-24); ctx.fillStyle=i===2?p.accent:p.muted; ctx.font=`700 24px ${BODY}`; ctx.fillText(lab,110,ry+50); const v=fitText(ctx,val,860,rowH-110,44,26,600,BODY,1.25); ctx.fillStyle=p.ink; ctx.font=`600 ${v.size}px ${BODY}`; v.lines.forEach((l,j)=>ctx.fillText(l,110,ry+70+v.size+j*v.size*v.lh)); });
+    const rowH=(1100-y)/3;
+    rows.forEach(([lab,val],i)=>{ const ry=y+i*rowH; ctx.fillStyle=p.soft; ctx.beginPath(); ctx.roundRect?ctx.roundRect(80,ry,920,rowH-22,18):ctx.rect(80,ry,920,rowH-22); ctx.fill(); ctx.fillStyle=i===2?p.accent:p.muted; ctx.font=`700 23px ${BODY}`; ctx.fillText(lab,112,ry+50); const v=fitRich(ctx,plain(val),856,rowH-104,44,26,600,BODY,1.25); drawRich(ctx,v,112,ry+66,p.ink,p.script,600,BODY); });
     drawSource(ctx,p,slide.source);
   } else if(t==="recap"){
-    let y=drawKicker(ctx,p,slide.kicker||"In short",200);
-    const items=(slide.items||[]).slice(0,6); ctx.fillStyle=p.ink;
-    const hh=(1060-y)/Math.max(items.length,1);
-    items.forEach((it,i)=>{ const ry=y+i*hh; ctx.fillStyle=p.accent; ctx.font=`800 44px ${DISP}`; ctx.fillText(String(i+1),80,ry+48); const v=fitText(ctx,it,820,hh-20,44,26,600,BODY,1.25); ctx.fillStyle=p.ink; ctx.font=`600 ${v.size}px ${BODY}`; v.lines.forEach((l,j)=>ctx.fillText(l,160,ry+44+j*v.size*v.lh)); });
+    let y=drawKicker(ctx,p,slide.kicker||"In short",190);
+    const items=(slide.items||[]).slice(0,6); const hh=(1100-y)/Math.max(items.length,1);
+    items.forEach((it,i)=>{ const ry=y+i*hh; ctx.fillStyle=p.accent; ctx.font=`700 46px ${DISP}`; ctx.fillText(String(i+1),80,ry+46); const v=fitRich(ctx,plain(it),820,hh-20,44,26,600,BODY,1.25); drawRich(ctx,v,160,ry,p.ink,p.script,600,BODY); });
     drawSource(ctx,p,slide.source);
   }
 }
@@ -821,9 +847,9 @@ function renderVisuals(){
   $("visFields").innerHTML=`
     <label class="f" for="visPost">Draft<select id="visPost">${posts.map(p=>`<option value="${esc(p.id)}" ${p.id===S.vis.postId?"selected":""}>${esc(((p.text||p.title||"").split("\n")[0]).slice(0,80))}</option>`).join("")}</select></label>
     <div class="tmpl" role="group" aria-label="Template">${Object.entries(TEMPLATES).map(([k,v])=>`<button aria-pressed="${k===S.vis.template}" data-t="${k}"><b>${v.name}</b><span>${v.desc}</span></button>`).join("")}</div>
-    <div class="actions"><button class="btn primary" id="visSuggest" ${post?"":"disabled"}>Suggest with Claude</button><select id="visTheme" aria-label="Colors" style="width:auto"><option value="light" ${S.vis.theme==="light"?"selected":""}>Cream</option><option value="dark" ${S.vis.theme==="dark"?"selected":""}>Ink</option></select></div>
+    <div class="actions"><button class="btn primary" id="visSuggest" ${post?"":"disabled"}>Suggest with Claude</button><select id="visTheme" aria-label="Colors" style="width:auto"><option value="light" ${S.vis.theme==="light"?"selected":""}>Cream (brand)</option><option value="dark" ${S.vis.theme==="dark"?"selected":""}>Dark</option></select></div>
     <div id="visMsg"></div>
-    <div class="fields" id="visInputs"></div>`;
+    <div class="fields" id="visInputs"></div><p class="muted" style="font-size:12.5px;margin:0">Wrap one word in *asterisks* to set it in Darman's coral script.</p>`;
   $("visPost").onchange=e=>{S.vis.postId=e.target.value;S.vis.fields={};S.vis.slides=[];renderVisuals();};
   $("visTheme").onchange=e=>{S.vis.theme=e.target.value;drawStage();};
   $("visFields").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{S.vis.template=b.dataset.t;S.vis.fields={};S.vis.slides=[];S.vis.slide=0;renderVisuals();});
@@ -858,7 +884,7 @@ function drawStage(){
     drawSlide($("visCanvas").getContext("2d"),slides[i],slides.length>1?i+1:0,slides.length>1?slides.length:0);
     if(slides.length>1) $("thumbs").querySelectorAll("canvas").forEach((c,j)=>drawSlide(c.getContext("2d"),slides[j],j+1,slides.length));
   };
-  document.fonts.ready.then(draw);
+  Promise.all([document.fonts.load('400 60px "Allura"'),document.fonts.load('700 60px "Instrument Sans"'),document.fonts.load('600 40px "Hanken Grotesk"')]).catch(()=>{}).then(()=>document.fonts.ready).then(draw);
   if(slides.length>1) $("thumbs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.vis.slide=Number(b.dataset.j);renderVisuals();});
   $("savePng").onclick=savePngs; const pdf=$("savePdf"); if(pdf) pdf.onclick=savePdf;
   $("keepVis").onclick=async()=>{ const p=S.posts.find(x=>x.id===S.vis.postId); if(!p) return; await writeDoc("posts/"+p.id,{...p,visual:{template:S.vis.template,fields:S.vis.fields,slides:S.vis.slides,theme:S.vis.theme},updatedAt:now()}); toast("Visual kept with the draft"); };
@@ -891,7 +917,7 @@ async function suggestVisual(){
     evidence:`{"kicker": string, "title": string (study name, under 60 characters), "effect": string (under 90 characters), "population": string (under 90 characters), "caveat": string (under 110 characters), "source": string}`,
     carousel:`{"slides": [ {"type":"cover","kicker":string,"text":string (6 words or fewer),"body":string (one line of promise)}, then 4-6 {"type":"point","kicker":string (e.g. "1 · The tool"),"text":string (3-8 words),"body":string (at most 25 words),"source":string or ""}, then {"type":"recap","kicker":"In short","items":[3-5 strings under 60 characters]}, then {"type":"cta","text":string (one action, e.g. "Follow darman.ai for more"),"body":string or ""} ]}`
   };
-  const prompt=`Design the words for a LinkedIn visual (1080x1350) for the Darman.ai page, based on this post. Use only facts and numbers that appear in the post; never add new ones. Plain, confident, no hype, no emoji.
+  const prompt=`Design the words for a LinkedIn visual (1080x1350) for the Darman.ai page, based on this post. Use only facts and numbers that appear in the post; never add new ones. Plain, confident, no hype, no emoji. Darman's signature: you may wrap ONE key word per text field in *asterisks*; it renders in Darman's coral handwritten script (like "you can *safely* use"). Use it at most once per slide, on a word that carries the meaning, never on a number.
 
 POST:
 ${post.text}
