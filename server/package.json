@@ -1,0 +1,21 @@
+{
+  "name": "darman-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Darman.ai LinkedIn writing desk: ideas, drafts, review and visuals. Never posts to LinkedIn.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "manage": "node manage.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.2.1"
+  }
+}

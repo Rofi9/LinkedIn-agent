@@ -121,6 +121,7 @@ input[type=text],input[type=url],select{width:100%;border:1px solid var(--line-s
 label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink-2)}
 .counter{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);gap:8px;flex-wrap:wrap}
 .counter .over{color:var(--bad);font-weight:700}
+#charCount{display:flex;gap:12px;flex-wrap:wrap}
 
 /* feed preview: the LinkedIn "see more" cut */
 .preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:14px}
@@ -306,6 +307,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
 </main>
 <div id="toast" class="toast" hidden></div>
 
+<!--__PLATFORM__-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 "use strict";
@@ -397,6 +399,7 @@ function sampleErr(e){
   if(c==="session_expired") return "Your claude.ai session expired. Sign in again.";
   if(c==="prompt_too_large") return "Too much text for one request. Shorten what you pasted.";
   if(c==="cancelled") return "Stopped.";
+  if(c==="config"&&e.message) return e.message;
   return "Something went wrong reaching Claude. Try again.";
 }
 async function copyText(text,label){
@@ -411,6 +414,7 @@ function showTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
   ["ideas","drafts","visuals","research","voice"].forEach(x=>$("p-"+x).hidden=x!==t);
   try{localStorage.setItem("studio.tab",t);}catch(e){}
+  window.scrollTo(0,0);
   if(t==="visuals") renderVisuals();
 }
 
@@ -834,6 +838,14 @@ function drawSlide(ctx,slide,page,total){
     drawSource(ctx,p,slide.source);
   }
 }
+/* A first pass taken from the draft itself, so the preview is never blank. */
+function starterFields(post,t){
+  const text=post.text||""; const first=(text.split("\n").find(l=>l.trim())||"").trim();
+  if(t==="hook") return {kicker:"",text:first,source:""};
+  if(t==="stat"){ const m=text.match(/(\$?\d[\d,.]*\s?%?(?:\s?of\s\d[\d,]*)?)/); const sent=m?(text.split(/(?<=[.!?])\s+|\n+/).find(s=>s.includes(m[1]))||""):""; return {kicker:"",number:m?m[1].trim():"",line:sent.replace(m?m[1]:"","").replace(/^[\s,:.-]+/,"").slice(0,110),source:""}; }
+  if(t==="evidence") return {kicker:"What the study measured",title:"",effect:"",population:"",caveat:"",source:""};
+  return {};
+}
 function visSlides(){
   const f=S.vis.fields, t=S.vis.template;
   if(t==="carousel") return S.vis.slides;
@@ -847,6 +859,7 @@ function renderVisuals(){
   const post=posts.find(p=>p.id===S.vis.postId);
   const tm=TEMPLATES[S.vis.template];
   if(post&&post.visual&&!Object.keys(S.vis.fields).length&&!S.vis.slides.length&&post.visual.template===S.vis.template){ S.vis.fields={...(post.visual.fields||{})}; S.vis.slides=(post.visual.slides||[]).map(s=>({...s})); }
+  if(post&&!Object.keys(S.vis.fields).length&&S.vis.template!=="carousel") S.vis.fields=starterFields(post,S.vis.template);
   $("visFields").innerHTML=`
     <label class="f" for="visPost">Draft<select id="visPost">${posts.map(p=>`<option value="${esc(p.id)}" ${p.id===S.vis.postId?"selected":""}>${esc(((p.text||p.title||"").split("\n")[0]).slice(0,80))}</option>`).join("")}</select></label>
     <div class="tmpl" role="group" aria-label="Template">${Object.entries(TEMPLATES).map(([k,v])=>`<button aria-pressed="${k===S.vis.template}" data-t="${k}"><b>${v.name}</b><span>${v.desc}</span></button>`).join("")}</div>
