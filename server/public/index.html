@@ -215,7 +215,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
   <!-- IDEAS -->
   <section id="p-ideas" role="tabpanel" aria-labelledby="tab-ideas">
     <div class="section-head">
-      <div><h2>Ideas</h2><p>Each idea rests on a sourced fact from your research. Generate a post from one, or ask Claude for new ones based on what's in Research.</p></div>
+      <div><h2>Ideas</h2><p>Each idea rests on a sourced fact from your research. Generate a post from one, or ask AI for new ones based on what's in Research.</p></div>
       <div class="actions">
         <select id="ideaFocus" aria-label="Focus for new ideas" style="width:auto">
           <option value="">Any topic</option>
@@ -249,7 +249,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
   <!-- VISUALS -->
   <section id="p-visuals" role="tabpanel" aria-labelledby="tab-visuals" hidden>
     <div class="section-head">
-      <div><h2>Visuals</h2><p>Pick a draft, let Claude suggest a visual, adjust the words, and save the image. Sized 1080 × 1350, LinkedIn's tallest feed format.</p></div>
+      <div><h2>Visuals</h2><p>Pick a draft, let AI suggest a visual, adjust the words, and save the image. Sized 1080 × 1350, LinkedIn's tallest feed format.</p></div>
     </div>
     <div class="vis">
       <div class="fields" id="visFields"></div>
@@ -260,7 +260,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
   <!-- RESEARCH -->
   <section id="p-research" role="tabpanel" aria-labelledby="tab-research" hidden>
     <div class="section-head">
-      <div><h2>Research</h2><p>The facts ideas are built from: hospitals, regulators, doctors who post about AI, studies and competitors. Add anything you read, including LinkedIn posts, and Claude explains it in plain English.</p></div>
+      <div><h2>Research</h2><p>The facts ideas are built from: hospitals, regulators, doctors who post about AI, studies and competitors. Add anything you read, including LinkedIn posts, and AI explains it in plain English.</p></div>
     </div>
     <div class="add">
       <h3 style="font-size:17px">Add something you read</h3>
@@ -279,7 +279,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
         <label class="f" for="resUrl">Link (optional)<input type="url" id="resUrl" placeholder="https://…"></label>
         <label class="f" for="resKind">What is it?
           <select id="resKind">
-            <option value="auto">Let Claude decide</option>
+            <option value="auto">Let AI decide</option>
             <option value="hospital">Hospital or health system</option>
             <option value="government">Government or regulator</option>
             <option value="physician">Doctor's post or article</option>
@@ -299,7 +299,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
   <!-- VOICE -->
   <section id="p-voice" role="tabpanel" aria-labelledby="tab-voice" hidden>
     <div class="section-head">
-      <div><h2>Voice</h2><p>Every draft Claude writes follows this profile: who Darman writes for, its positions, and the claims it must never make. Edit it here and every new draft uses it.</p></div>
+      <div><h2>Voice</h2><p>Every draft AI writes follows this profile: who Darman writes for, its positions, and the claims it must never make. Edit it here and every new draft uses it.</p></div>
       <div class="actions"><button class="btn primary" id="saveVoice">Save voice</button></div>
     </div>
     <textarea id="voiceText" style="min-height:560px;font-size:14px" aria-label="Voice profile"></textarea>
@@ -406,7 +406,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
     if (me.isAdmin) $("platTeam").onclick = openTeam;
     if (!me.ai) {
       const b = $("banner");
-      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">Claude isn't connected on this server yet (no ANTHROPIC_API_KEY). You can review and edit drafts, but generating needs the key.</div>`;
+      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">AI drafting isn't set up on this server yet. Add OPENAI_API_KEY and OPENAI_MODEL (or ANTHROPIC_API_KEY) to the server's .env. You can still review and edit drafts.</div>`;
     }
   }
 
@@ -522,7 +522,7 @@ details.help ol{margin:8px 0 0;padding-left:20px}
     },
   });
 
-  /* ---------- sample: Claude through the server ---------- */
+  /* ---------- sample: AI through the server ---------- */
   async function sampleJson(prompt, opts) {
     if (opts?.signal?.aborted) throw { code: "cancelled" };
     try { const r = await api("POST", "/api/ai", { prompt }); return r.value; }
@@ -634,15 +634,15 @@ const now=()=>new Date().toISOString();
 const fmtDate=iso=>{ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?iso:d.toLocaleDateString(undefined,{day:"numeric",month:"short"}); };
 function sampleErr(e){
   const c=e&&e.code;
-  if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled") return "Claude isn't allowed on this page for your account. Allow it when asked, or open Studio in claude.ai.";
-  if(c==="rate_limited") return "Claude is busy or you've hit your usage limit. Try again in a few minutes.";
-  if(c==="invalid_json") return "Claude's answer came back in the wrong shape. Press the button again.";
-  if(c==="refused") return "Claude declined this request. Try rewording it.";
+  if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled") return "AI isn't allowed on this page for your account. Allow it when asked, or open Studio in claude.ai.";
+  if(c==="rate_limited") return "AI is busy or you've hit your usage limit. Try again in a few minutes.";
+  if(c==="invalid_json") return "The AI's answer came back in the wrong shape. Press the button again.";
+  if(c==="refused") return "AI declined this request. Try rewording it.";
   if(c==="session_expired") return "Your claude.ai session expired. Sign in again.";
   if(c==="prompt_too_large") return "Too much text for one request. Shorten what you pasted.";
   if(c==="cancelled") return "Stopped.";
   if(c==="config"&&e.message) return e.message;
-  return "Something went wrong reaching Claude. Try again.";
+  return "Something went wrong reaching AI. Try again.";
 }
 async function copyText(text,label){
   try{ await navigator.clipboard.writeText(text); toast(label+" copied"); return true; }
@@ -713,8 +713,8 @@ async function ideaAction(id,act,btn){
 }
 async function generatePost(idea,btn){
   const msg=btn.closest(".card").querySelector(".gen-msg");
-  if(!S.sample){ msg.innerHTML=`<div class="notice warn">Claude isn't available in this view, so Studio can't write drafts here.</div>`; return; }
-  btn.disabled=true; msg.innerHTML=`<span class="thinking">Claude is writing the draft. This takes up to a minute.</span>`;
+  if(!S.sample){ msg.innerHTML=`<div class="notice warn">AI isn't available in this view, so Studio can't write drafts here.</div>`; return; }
+  btn.disabled=true; msg.innerHTML=`<span class="thinking">AI is writing the draft. This takes up to a minute.</span>`;
   const prompt=`You write LinkedIn posts for the Darman.ai company page.
 
 VOICE PROFILE (follow it exactly):
@@ -751,9 +751,9 @@ Reply with only JSON: {"post": string, "firstComment": string (sources as plain 
 }
 $("suggestBtn").onclick=async()=>{
   const btn=$("suggestBtn"), m=$("ideaMsg");
-  if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  if(!S.sample){ m.innerHTML=`<div class="notice warn">AI isn't available in this view.</div>`; return; }
   const focus=$("ideaFocus").value;
-  btn.disabled=true; m.innerHTML=`<p><span class="thinking">Claude is reading your research and looking for angles…</span></p>`;
+  btn.disabled=true; m.innerHTML=`<p><span class="thinking">AI is reading your research and looking for angles…</span></p>`;
   const existing=S.ideas.map(i=>"- "+i.hook).slice(0,80).join("\n");
   const prompt=`You suggest LinkedIn post ideas for the Darman.ai company page.
 
@@ -837,7 +837,7 @@ function renderEditor(){
         <textarea id="postText" aria-label="Post text">${esc(p.text||"")}</textarea>
         <div class="counter"><span id="charCount"></span><span id="saveState" class="muted"></span></div>
         <div class="revise">
-          <input type="text" id="reviseIn" placeholder="Tell Claude what to change, e.g. “shorter, more for hospital leaders”" aria-label="Revision instruction">
+          <input type="text" id="reviseIn" placeholder="Tell AI what to change, e.g. “shorter, more for hospital leaders”" aria-label="Revision instruction">
           <button class="btn" id="reviseBtn">Revise</button>
         </div>
         <div class="quick" id="quickRev">
@@ -922,7 +922,7 @@ async function revise(instr){
   instr=(instr||"").trim(); if(!instr) return;
   const p=S.posts.find(x=>x.id===S.current); if(!p) return;
   const m=$("reviseMsg");
-  if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
+  if(!S.sample){ m.innerHTML=`<div class="notice warn">AI isn't available in this view.</div>`; return; }
   const btn=$("reviseBtn"); btn.disabled=true; m.innerHTML=`<span class="thinking">Revising…</span>`;
   const prompt=`Revise this LinkedIn post for the Darman.ai company page.
 
@@ -961,8 +961,8 @@ $("analyzeBtn").onclick=async()=>{
   const text=$("resText").value.trim(), url=$("resUrl").value.trim(), kind=$("resKind").value;
   const m=$("analyzeMsg"), out=$("analyzeOut");
   if(!text){ m.innerHTML=`<span class="muted">Paste some text first.</span>`; return; }
-  if(!S.sample){ out.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
-  const btn=$("analyzeBtn"); btn.disabled=true; m.innerHTML=`<span class="thinking">Claude is reading it…</span>`; out.innerHTML="";
+  if(!S.sample){ out.innerHTML=`<div class="notice warn">AI isn't available in this view.</div>`; return; }
+  const btn=$("analyzeBtn"); btn.disabled=true; m.innerHTML=`<span class="thinking">AI is reading it…</span>`; out.innerHTML="";
   const prompt=`You help the person who runs the Darman.ai LinkedIn page. They have NO medical background. Darman.ai teaches physicians to use AI practically and responsibly (short, specialty-specific courses led by doctors, plus a hands-on sandbox).
 
 VOICE PROFILE (for positions and forbidden claims):
@@ -1105,7 +1105,7 @@ function renderVisuals(){
   $("visFields").innerHTML=`
     <label class="f" for="visPost">Draft<select id="visPost">${posts.map(p=>`<option value="${esc(p.id)}" ${p.id===S.vis.postId?"selected":""}>${esc(((p.text||p.title||"").split("\n")[0]).slice(0,80))}</option>`).join("")}</select></label>
     <div class="tmpl" role="group" aria-label="Template">${Object.entries(TEMPLATES).map(([k,v])=>`<button aria-pressed="${k===S.vis.template}" data-t="${k}"><b>${v.name}</b><span>${v.desc}</span></button>`).join("")}</div>
-    <div class="actions"><button class="btn primary" id="visSuggest" ${post?"":"disabled"}>Suggest with Claude</button><select id="visTheme" aria-label="Colors" style="width:auto"><option value="light" ${S.vis.theme==="light"?"selected":""}>Cream (brand)</option><option value="dark" ${S.vis.theme==="dark"?"selected":""}>Dark</option></select></div>
+    <div class="actions"><button class="btn primary" id="visSuggest" ${post?"":"disabled"}>Suggest with AI</button><select id="visTheme" aria-label="Colors" style="width:auto"><option value="light" ${S.vis.theme==="light"?"selected":""}>Cream (brand)</option><option value="dark" ${S.vis.theme==="dark"?"selected":""}>Dark</option></select></div>
     <div id="visMsg"></div>
     <div class="fields" id="visInputs"></div><p class="muted" style="font-size:12.5px;margin:0">Wrap one word in *asterisks* to set it in Darman's coral script.</p>`;
   $("visPost").onchange=e=>{S.vis.postId=e.target.value;S.vis.fields={};S.vis.slides=[];renderVisuals();};
@@ -1121,7 +1121,7 @@ function renderVisuals(){
       <label class="f" for="vf-kicker">Label above<input type="text" id="vf-kicker" data-k="kicker" value="${esc(sl.kicker||"")}"></label>
       ${sl.type==="recap"?`<label class="f" for="vf-items">Points, one per line<textarea id="vf-items" class="small" data-k="items">${esc((sl.items||[]).join("\n"))}</textarea></label>`:`<label class="f" for="vf-text">Headline<textarea id="vf-text" class="small" data-k="text">${esc(sl.text||"")}</textarea></label><label class="f" for="vf-body">Supporting line<textarea id="vf-body" class="small" data-k="body">${esc(sl.body||"")}</textarea></label>`}
       <label class="f" for="vf-source">Small print<input type="text" id="vf-source" data-k="source" value="${esc(sl.source||"")}"></label>`
-      :`<div class="empty">Press “Suggest with Claude” to turn this draft into 6–9 slides.</div>`;
+      :`<div class="empty">Press “Suggest with AI” to turn this draft into 6–9 slides.</div>`;
   }
   inp.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{
     const k=el.dataset.k;
@@ -1167,8 +1167,8 @@ async function savePdf(){
 }
 async function suggestVisual(){
   const post=S.posts.find(p=>p.id===S.vis.postId); const m=$("visMsg");
-  if(!post) return; if(!S.sample){ m.innerHTML=`<div class="notice warn">Claude isn't available in this view.</div>`; return; }
-  const t=S.vis.template, btn=$("visSuggest"); btn.disabled=true; m.innerHTML=`<span class="thinking">Claude is designing the words for the visual…</span>`;
+  if(!post) return; if(!S.sample){ m.innerHTML=`<div class="notice warn">AI isn't available in this view.</div>`; return; }
+  const t=S.vis.template, btn=$("visSuggest"); btn.disabled=true; m.innerHTML=`<span class="thinking">AI is designing the words for the visual…</span>`;
   const shapes={
     stat:`{"kicker": string (3-5 words), "number": string (ONE number that appears in the post, e.g. "9 of 20" or "72%"), "line": string (under 90 characters: what it means), "source": string (short source, e.g. "Ontario Auditor General, 2026")}`,
     hook:`{"kicker": string (3-5 words), "text": string (the hook, under 110 characters), "source": string (optional small print or "")}`,
@@ -1210,7 +1210,7 @@ async function boot(){
   const [db,sample,downloads]=await Promise.all([use("db"),use("sample"),use("downloads")]);
   S.sample=sample; S.downloads=downloads; S.db=db;
   if(!db){ setStatus(false,"Offline copy: open Studio in claude.ai to load your drafts"); $("banner").innerHTML=`<div class="notice warn" style="margin-bottom:16px">This copy can't reach Studio's saved data. Open it from claude.ai while signed in.</div>`; return; }
-  setStatus(true, sample?"Synced · Claude ready":"Synced · Claude unavailable");
+  setStatus(true, sample?"Synced · AI ready":"Synced · AI unavailable");
   const onErr=e=>{ if(e.code==="revoked") setStatus(false,"Access changed. Reload the page."); };
   db.collection("ideas").onSnapshot(s=>{ S.ideas=s.docs.map(d=>({id:d.id,...d.data()})); renderIdeas(); },onErr);
   db.collection("posts").onSnapshot(s=>{

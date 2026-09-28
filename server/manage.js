@@ -4,6 +4,7 @@
 //   node manage.js list-users
 //   node manage.js remove-user <email>
 //   node manage.js backup [file]        (safe while the app is running)
+//   node manage.js models               (model IDs your AI key can use)
 import { db, createUser, findUserByEmail, setPassword, listUsers, deleteUser, randomPassword } from "./db.js";
 import path from "node:path";
 
@@ -45,6 +46,13 @@ switch (cmd) {
     console.log(`Backed up to ${file}`);
     break;
   }
+  case "models": {
+    const { listModels, provider } = await import("./ai.js");
+    if (provider === "none") { console.log("No AI key set. Add OPENAI_API_KEY or ANTHROPIC_API_KEY to .env."); process.exit(1); }
+    try { for (const id of await listModels()) console.log(id); }
+    catch (e) { console.log(`Couldn't list models: ${e.message}`); process.exit(1); }
+    break;
+  }
   default:
-    console.log("Commands: add-user <email> <name> [--admin] | reset-password <email> | list-users | remove-user <email> | backup [file]");
+    console.log("Commands: add-user <email> <name> [--admin] | reset-password <email> | list-users | remove-user <email> | backup [file] | models");
 }

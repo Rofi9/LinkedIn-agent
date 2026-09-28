@@ -31,6 +31,10 @@ print("built artifact", len(artifact), "bytes")
 # Self-hosted version: same page plus the server platform layer, as a full HTML document.
 platform = open(os.path.join(here, "platform-server.js")).read()
 page = out.replace("<!--__PLATFORM__-->", "<script>\n" + platform + "\n</script>")
+# The server can run on Claude or OpenAI, so its page says "AI" (the Chrome extension keeps its name).
+page = (page.replace("Claude in Chrome", "\u0001").replace("Claude extension", "\u0002")
+            .replace("Claude's", "The AI's").replace("Let Claude decide", "Let AI decide").replace("Claude", "AI")
+            .replace("\u0001", "Claude in Chrome").replace("\u0002", "Claude extension"))
 doc = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
        '<link rel="icon" href="' + logos["markCoral"] + '">'

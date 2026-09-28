@@ -96,7 +96,7 @@
     if (me.isAdmin) $("platTeam").onclick = openTeam;
     if (!me.ai) {
       const b = $("banner");
-      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">Claude isn't connected on this server yet (no ANTHROPIC_API_KEY). You can review and edit drafts, but generating needs the key.</div>`;
+      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">AI drafting isn't set up on this server yet. Add OPENAI_API_KEY and OPENAI_MODEL (or ANTHROPIC_API_KEY) to the server's .env. You can still review and edit drafts.</div>`;
     }
   }
 

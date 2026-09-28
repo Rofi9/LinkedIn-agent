@@ -6,8 +6,8 @@ on-brand visuals. **It never posts to LinkedIn.** People copy the finished
 post and publish it themselves.
 
 It runs as one Docker container with a SQLite database stored in a Docker
-volume. Claude runs through your Anthropic API key, on the server; the key
-never reaches anyone's browser.
+volume. Drafting runs through **your OpenAI API key** (or an Anthropic key, if
+you get one later) on the server; the key never reaches anyone's browser.
 
 ---
 
@@ -15,8 +15,9 @@ never reaches anyone's browser.
 
 - The Hetzner server (Ubuntu 22.04 or 24.04; the smallest CX or CAX plan is enough).
 - SSH access to it as root or a sudo user.
-- An **Anthropic API key**: [console.anthropic.com](https://console.anthropic.com) → API keys.
-  Usage is billed to that account. Each draft is one Claude Opus 5 request.
+- An **OpenAI API key**: [platform.openai.com](https://platform.openai.com) → API keys.
+  Usage is billed to that account; each draft, revision or idea batch is one request.
+  (An Anthropic key from console.anthropic.com works too; see the settings reference.)
 
 ## 1. Install Docker (once)
 
@@ -59,7 +60,8 @@ Fill in at least:
 
 | Setting | What to put |
 |---|---|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| `OPENAI_API_KEY` | Your OpenAI API key |
+| `OPENAI_MODEL` | Leave empty for now; you'll fill it in step 4 |
 | `ADMIN_EMAIL` | Your email; this becomes the first admin |
 | `ADMIN_NAME` | Your name |
 | `ADMIN_PASSWORD` | A password of 10+ characters, or leave empty and read the generated one from the logs |
@@ -73,8 +75,24 @@ docker compose up -d --build
 docker compose logs app
 ```
 
-The logs should show `Loaded 98 starter documents`, `Created admin …` and
-`Darman Studio on http://0.0.0.0:3000 (… Claude configured)`.
+The logs should show `Loaded 98 starter documents` and `Created admin …`.
+
+Now choose the model. List the models your key can use:
+
+```bash
+docker compose exec app node manage.js models
+```
+
+Pick OpenAI's current flagship general-purpose model from that list (check
+[OpenAI's model page](https://platform.openai.com/docs/models) if unsure), put
+it in `.env` as `OPENAI_MODEL=...`, and apply it:
+
+```bash
+docker compose up -d
+docker compose logs app | tail -1
+```
+
+The last line should end with `(AI: openai, model …, ready)`.
 
 Open **http://YOUR_SERVER_IP** in a browser and sign in.
 
@@ -96,6 +114,7 @@ docker compose exec app node manage.js add-user someone@darman.ai "Name" --admin
 docker compose exec app node manage.js list-users
 docker compose exec app node manage.js reset-password someone@darman.ai
 docker compose exec app node manage.js remove-user someone@darman.ai
+docker compose exec app node manage.js models
 ```
 
 ---
@@ -140,16 +159,22 @@ To restore: stop the app, copy the file into the volume as `studio.db`, start ag
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `CLAUDE_MODEL` | `claude-opus-5` | The Claude model used for every request |
-| `CLAUDE_FALLBACKS` | `on` | If Claude declines a request, Anthropic re-runs it on its recommended fallback model. `off` disables this |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | empty | OpenAI key and the model ID used for every request |
+| `ANTHROPIC_API_KEY` | empty | Use Claude instead (or as well, with `AI_PROVIDER`) |
+| `AI_PROVIDER` | automatic | `openai` or `anthropic` when both keys are set |
+| `CLAUDE_MODEL` | `claude-opus-5` | Claude only: model used for every request |
+| `CLAUDE_FALLBACKS` | `on` | Claude only: re-run a declined request on Anthropic's recommended fallback model. `off` disables this |
 | `HTTP_PORT` | `80` | Port on the server |
 | `INGEST_TOKEN` | empty | Lets automations add research and ideas with `POST /api/ingest` and `Authorization: Bearer <token>` |
 
 ## Troubleshooting
 
-- **"Claude isn't connected on this server"** banner: `ANTHROPIC_API_KEY` is
-  missing. Add it to `.env` and run `docker compose up -d`.
-- **"The server's Anthropic API key is missing or invalid"**: the key is wrong
-  or revoked. Create a new one.
+- **"AI drafting isn't set up on this server yet"** banner: `OPENAI_API_KEY` or
+  `OPENAI_MODEL` is missing. Add them to `.env` and run `docker compose up -d`.
+- **"The server's OpenAI API key is missing or invalid"**: the key is wrong or
+  revoked. Create a new one.
+- **"OpenAI doesn't recognize the model"**: `OPENAI_MODEL` has a typo or your
+  key can't use it. Run `node manage.js models` again and copy an ID exactly.
+- **"out of credit"**: add billing credit to the OpenAI account.
 - **Forgot the admin password**: `docker compose exec app node manage.js reset-password you@darman.ai`.
 - **See what's happening**: `docker compose logs -f app`.

@@ -1,4 +1,4 @@
-// Darman Studio server: login, shared documents, and Claude.
+// Darman Studio server: login, shared documents, and AI drafting (Claude or OpenAI).
 // It never talks to LinkedIn.
 import express from "express";
 import path from "node:path";
@@ -9,7 +9,7 @@ import {
   findUserByEmail, checkPassword, createSession, sessionUser, endSession,
   listUsers, createUser, deleteUser, setPassword, userCount, randomPassword,
 } from "./db.js";
-import { askJson, AiError, aiConfigured, aiModel } from "./ai.js";
+import { askJson, AiError, aiConfigured, aiModel, provider } from "./ai.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
@@ -101,7 +101,7 @@ app.post("/api/logout", (req, res) => {
   setSessionCookie(res, "", 0);
   res.json({ ok: true });
 });
-app.get("/api/me", auth, (req, res) => res.json({ ...req.user, ai: aiConfigured(), model: aiModel }));
+app.get("/api/me", auth, (req, res) => res.json({ ...req.user, ai: aiConfigured(), provider, model: aiModel }));
 app.post("/api/me/password", auth, (req, res) => {
   const { current, next: nextPw } = req.body || {};
   const user = findUserByEmail(req.user.email);
@@ -159,11 +159,10 @@ app.delete("/api/docs/:collection/:id", auth, (req, res) => {
   res.json({ ok: true, rev: rev() });
 });
 
-/* ---------- Claude ---------- */
+/* ---------- AI ---------- */
 let inflight = 0;
 app.post("/api/ai", auth, async (req, res) => {
-  if (!aiConfigured()) return res.status(503).json({ error: "config", message: "ANTHROPIC_API_KEY is not set on the server." });
-  if (inflight >= 6) return res.status(429).json({ error: "rate_limited", message: "Claude is busy. Try again in a minute." });
+  if (inflight >= 6) return res.status(429).json({ error: "rate_limited", message: "The AI is busy. Try again in a minute." });
   inflight++;
   try {
     const value = await askJson(req.body?.prompt);
@@ -205,4 +204,4 @@ app.post("/api/ingest", (req, res) => {
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 app.use(express.static(path.join(here, "public"), { index: "index.html", maxAge: "5m" }));
 
-app.listen(PORT, () => console.log(`Darman Studio on http://0.0.0.0:${PORT} (model ${aiModel}, Claude ${aiConfigured() ? "configured" : "NOT configured"})`));
+app.listen(PORT, () => console.log(`Darman Studio on http://0.0.0.0:${PORT} (AI: ${provider}, model ${aiModel}, ${aiConfigured() ? "ready" : "NOT configured"})`));
