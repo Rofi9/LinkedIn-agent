@@ -1,180 +1,115 @@
-# Deploying Darman Studio on your Hetzner server
+# Putting Darman Studio online (Vercel)
 
 Darman Studio is the team's LinkedIn writing desk: research-backed ideas,
-Claude-written drafts to review, accept or reject, a human-score check, and
+AI-written drafts to review, accept or reject, a human-score check, and
 on-brand visuals. **It never posts to LinkedIn.** People copy the finished
 post and publish it themselves.
 
-It runs as one Docker container with a SQLite database stored in a Docker
-volume. Drafting runs through **your OpenAI API key** (or an Anthropic key, if
-you get one later) on the server; the key never reaches anyone's browser.
+On Vercel you get, with no server to manage:
+- a web address like `https://darman-studio.vercel.app`, with HTTPS already on;
+- a free Postgres database (Neon) for drafts, ideas, research and accounts;
+- automatic updates whenever the code on GitHub changes.
+
+**Cost:** Vercel's Hobby plan and Neon's free plan cost nothing. You pay OpenAI
+for what you generate. Vercel's Hobby plan is meant for personal and
+non-commercial projects; if Vercel asks, the Pro plan is about $20 per month
+per team member (check vercel.com/pricing).
+
+About 15 minutes, all in the browser.
 
 ---
 
-## What you need
+## 1. Create the project
 
-- The Hetzner server (Ubuntu 22.04 or 24.04; the smallest CX or CAX plan is enough).
-- SSH access to it as root or a sudo user.
-- An **OpenAI API key**: [platform.openai.com](https://platform.openai.com) → API keys.
-  Usage is billed to that account; each draft, revision or idea batch is one request.
-  (An Anthropic key from console.anthropic.com works too; see the settings reference.)
+1. Go to [vercel.com/signup](https://vercel.com/signup) and sign up **with GitHub**.
+2. Click **Add New… → Project**. If `rofi9/linkedin-agent` isn't listed,
+   click **Adjust GitHub App Permissions** and give Vercel access to that
+   repository.
+3. Click **Import** next to `linkedin-agent`.
+4. On the setup screen:
+   - **Root Directory:** click **Edit** and choose `server`.
+   - **Framework Preset:** Other.
+   - Open **Environment Variables** and add:
 
-## 1. Install Docker (once)
-
-```bash
-ssh root@YOUR_SERVER_IP
-curl -fsSL https://get.docker.com | sh
-```
-
-## 2. Get the code
-
-The repository is private, so give the server read-only access with a deploy key:
-
-```bash
-ssh-keygen -t ed25519 -N "" -f ~/.ssh/studio_deploy
-cat ~/.ssh/studio_deploy.pub
-```
-
-Copy the line it prints. On GitHub, open **rofi9/linkedin-agent → Settings →
-Deploy keys → Add deploy key**, paste it, leave "Allow write access" off, and
-save. Then:
-
-```bash
-GIT_SSH_COMMAND="ssh -i ~/.ssh/studio_deploy" \
-  git clone -b claude/linkedin-agent-skill-install-yvlx2i \
-  git@github.com:rofi9/linkedin-agent.git /opt/studio
-cd /opt/studio
-git config core.sshCommand "ssh -i ~/.ssh/studio_deploy"
-```
-
-(Once this work is merged into `main`, drop the `-b …` part.)
-
-## 3. Configure
-
-```bash
-cp .env.example .env
-nano .env
-```
-
-Fill in at least:
-
-| Setting | What to put |
+| Name | Value |
 |---|---|
-| `OPENAI_API_KEY` | Your OpenAI API key |
-| `OPENAI_MODEL` | Leave empty for now; you'll fill it in step 4 |
-| `ADMIN_EMAIL` | Your email; this becomes the first admin |
+| `OPENAI_API_KEY` | Your OpenAI API key (platform.openai.com → API keys) |
+| `OPENAI_MODEL` | Leave out for now if you don't know it; Studio will list the options (step 3) |
+| `ADMIN_EMAIL` | Your email; this becomes the first admin account |
 | `ADMIN_NAME` | Your name |
-| `ADMIN_PASSWORD` | A password of 10+ characters, or leave empty and read the generated one from the logs |
+| `ADMIN_PASSWORD` | A password of 10+ characters for your admin account |
 
-Save with Ctrl+O, Enter, then Ctrl+X.
+5. Click **Deploy**. It takes about a minute.
 
-## 4. Start it
+## 2. Add the database
 
-```bash
-docker compose up -d --build
-docker compose logs app
-```
+1. In the project, open the **Storage** tab.
+2. Click **Create Database** (or **Connect Database**) → **Neon** (serverless
+   Postgres) → keep the free plan → **Create**, and connect it to this project
+   for all environments. Vercel adds `DATABASE_URL` for you.
+3. Open **Deployments**, click **⋯** on the latest one → **Redeploy**.
 
-The logs should show `Loaded 98 starter documents` and `Created admin …`.
+## 3. Sign in and finish setup
 
-Now choose the model. List the models your key can use:
+1. Open the project's address (shown on the project page, e.g.
+   `https://linkedin-agent-xxxx.vercel.app`). You can rename it under
+   **Settings → Domains**.
+2. Sign in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The first sign-in loads the
+   starter research, ideas, drafts and voice profile.
+3. If you didn't set `OPENAI_MODEL`, a yellow banner lists the models your
+   OpenAI key can use. Pick OpenAI's newest general-purpose model (not a
+   "mini" or "nano" one), add it as `OPENAI_MODEL` under **Settings →
+   Environment Variables**, and **Redeploy** again.
+4. Test once: **Ideas → Generate post**. A draft should appear within a minute.
 
-```bash
-docker compose exec app node manage.js models
-```
+## 4. Add your team
 
-Pick OpenAI's current flagship general-purpose model from that list (check
-[OpenAI's model page](https://platform.openai.com/docs/models) if unsure), put
-it in `.env` as `OPENAI_MODEL=...`, and apply it:
-
-```bash
-docker compose up -d
-docker compose logs app | tail -1
-```
-
-The last line should end with `(AI: openai, model …, ready)`.
-
-Open **http://YOUR_SERVER_IP** in a browser and sign in.
-
-If the page doesn't load, the firewall may be closed. With Hetzner's Cloud
-Firewall, allow inbound TCP 80 (and 443 later). With `ufw` on the server:
-`ufw allow 80/tcp`.
-
-## 5. Add your team
-
-Signed in as admin, press **Team** (top right), enter a colleague's email and
-name, and press **Add**. Studio shows a temporary password once. Send it to
-them; they change it under **Password** after signing in.
-
-From the server instead:
-
-```bash
-docker compose exec app node manage.js add-user ruzanna@darman.ai "Ruzanna Hovhannisyan"
-docker compose exec app node manage.js add-user someone@darman.ai "Name" --admin
-docker compose exec app node manage.js list-users
-docker compose exec app node manage.js reset-password someone@darman.ai
-docker compose exec app node manage.js remove-user someone@darman.ai
-docker compose exec app node manage.js models
-```
+Press **Team** (top right), enter a colleague's email and name, and press
+**Add**. Studio shows a temporary password once; send it to them. They change
+it under **Password** after signing in. Admins can reset passwords and remove
+people from the same panel.
 
 ---
 
-## Security note while you're on the IP address
+## Good to know
 
-Without a domain there's no HTTPS, so passwords and drafts travel
-unencrypted between browsers and the server. That's acceptable for a short
-test with non-sensitive content, but add a domain before the team relies on
-it:
-
-1. Point a DNS **A record** (for example `studio.darman.ai`) at the server IP.
-2. In `.env` set `DOMAIN=studio.darman.ai`, `HTTP_PORT=8080`,
-   `COOKIE_SECURE=true`, `TRUST_PROXY=true`.
-3. Run `docker compose --profile https up -d`.
-4. Allow TCP 443 in the firewall. Caddy fetches the HTTPS certificate
-   automatically. Open **https://studio.darman.ai**.
-
----
-
-## Updating
-
-```bash
-cd /opt/studio
-git pull
-docker compose up -d --build
-```
-
-Data lives in the `studio-data` volume and survives updates and restarts.
-
-## Backups
-
-```bash
-docker compose exec app node manage.js backup
-docker compose cp app:/data/backup-$(date +%F).db ./studio-backup-$(date +%F).db
-```
-
-Copy that file somewhere off the server (or enable Hetzner's server backups).
-To restore: stop the app, copy the file into the volume as `studio.db`, start again.
-
-## Settings reference
-
-| Setting | Default | Meaning |
-|---|---|---|
-| `OPENAI_API_KEY` / `OPENAI_MODEL` | empty | OpenAI key and the model ID used for every request |
-| `ANTHROPIC_API_KEY` | empty | Use Claude instead (or as well, with `AI_PROVIDER`) |
-| `AI_PROVIDER` | automatic | `openai` or `anthropic` when both keys are set |
-| `CLAUDE_MODEL` | `claude-opus-5` | Claude only: model used for every request |
-| `CLAUDE_FALLBACKS` | `on` | Claude only: re-run a declined request on Anthropic's recommended fallback model. `off` disables this |
-| `HTTP_PORT` | `80` | Port on the server |
-| `INGEST_TOKEN` | empty | Lets automations add research and ideas with `POST /api/ingest` and `Authorization: Bearer <token>` |
+- **Updates:** when the code on GitHub changes, Vercel redeploys by itself.
+- **After changing an environment variable,** always Redeploy; the change only
+  applies to new deployments.
+- **Your data** lives in the Neon database, not in Vercel, so redeploys never
+  lose anything. Neon's dashboard (reachable from the Storage tab) has backups.
+- **Time limit:** each AI request may run up to 60 seconds. If drafts time
+  out, choose a faster model or, on Vercel Pro, raise `maxDuration` in
+  `server/vercel.json`.
+- **Claude instead of OpenAI:** add `ANTHROPIC_API_KEY` and set
+  `AI_PROVIDER=anthropic`. The default Claude model is `claude-opus-5`.
 
 ## Troubleshooting
 
-- **"AI drafting isn't set up on this server yet"** banner: `OPENAI_API_KEY` or
-  `OPENAI_MODEL` is missing. Add them to `.env` and run `docker compose up -d`.
-- **"The server's OpenAI API key is missing or invalid"**: the key is wrong or
-  revoked. Create a new one.
-- **"OpenAI doesn't recognize the model"**: `OPENAI_MODEL` has a typo or your
-  key can't use it. Run `node manage.js models` again and copy an ID exactly.
-- **"out of credit"**: add billing credit to the OpenAI account.
-- **Forgot the admin password**: `docker compose exec app node manage.js reset-password you@darman.ai`.
-- **See what's happening**: `docker compose logs -f app`.
+| What you see | Fix |
+|---|---|
+| "No database connected" when signing in | Do step 2, then Redeploy |
+| Can't sign in the first time | Check `ADMIN_EMAIL` and `ADMIN_PASSWORD` were set before the first sign-in, then Redeploy. The admin is created only while there are no users |
+| "AI drafting isn't set up yet" banner | Add `OPENAI_API_KEY` and `OPENAI_MODEL`, then Redeploy |
+| "OpenAI doesn't recognize the model" | `OPENAI_MODEL` has a typo; copy a name from the banner's list exactly |
+| "out of credit" | Add billing credit to the OpenAI account |
+| Anything else | Project → **Logs** shows the server's error messages |
+
+---
+
+## Alternative: your own server with Docker
+
+The same code also runs on any Linux server (such as the Hetzner one) with a
+built-in database, no Neon needed:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+git clone <this repository> /opt/studio && cd /opt/studio
+cp .env.example .env && nano .env        # OPENAI_API_KEY, OPENAI_MODEL, ADMIN_EMAIL, ADMIN_PASSWORD
+docker compose up -d --build             # then open http://SERVER_IP
+docker compose exec app node manage.js models   # list model names for OPENAI_MODEL
+```
+
+Without a domain this runs without HTTPS; see `deploy/Caddyfile` and the
+`https` profile in `docker-compose.yml` to add one. Other admin commands:
+`add-user`, `reset-password`, `list-users`, `remove-user`, `export`.

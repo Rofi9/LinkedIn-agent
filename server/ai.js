@@ -86,7 +86,7 @@ async function askOpenAI(prompt) {
   } catch (err) {
     if (err instanceof OpenAI.AuthenticationError) throw new AiError("config", "The server's OpenAI API key is missing or invalid.", 500);
     if (err instanceof OpenAI.RateLimitError) throw new AiError("rate_limited", "The AI is busy or the OpenAI account is out of credit. Try again later.", 429);
-    if (err instanceof OpenAI.NotFoundError) throw new AiError("config", `OpenAI doesn't recognize the model "${OPENAI_MODEL}". Run: node manage.js models`, 500);
+    if (err instanceof OpenAI.NotFoundError) throw new AiError("config", `OpenAI doesn't recognize the model "${OPENAI_MODEL}". Check the exact model name in OPENAI_MODEL.`, 500);
     if (err instanceof OpenAI.BadRequestError) throw new AiError("invalid_request", err.message, 400);
     if (err instanceof OpenAI.APIError) throw new AiError("upstream_error", `AI service error ${err.status ?? ""}`.trim(), 502);
     throw new AiError("upstream_error", "Couldn't reach the AI service.", 502);
@@ -100,7 +100,7 @@ async function askOpenAI(prompt) {
 export async function askJson(prompt) {
   if (typeof prompt !== "string" || !prompt.trim()) throw new AiError("invalid_request", "Empty prompt", 400);
   if (prompt.length > 120_000) throw new AiError("prompt_too_large", "Prompt too large", 413);
-  if (!aiConfigured()) throw new AiError("config", provider === "openai" ? "Set OPENAI_MODEL in .env (run: node manage.js models to see options)." : "No AI key is set on the server. Add ANTHROPIC_API_KEY or OPENAI_API_KEY to .env.", 503);
+  if (!aiConfigured()) throw new AiError("config", provider === "openai" ? "OPENAI_MODEL isn't set. Add it to the server's environment variables (on Vercel: Settings > Environment Variables), then redeploy." : "No AI key is set. Add OPENAI_API_KEY and OPENAI_MODEL (or ANTHROPIC_API_KEY) to the server's environment variables (on Vercel: Settings > Environment Variables), then redeploy.", 503);
   const text = provider === "openai" ? await askOpenAI(prompt) : await askClaude(prompt);
   const value = parseJson(text);
   if (value === undefined) throw new AiError("invalid_json", "The AI's answer wasn't valid JSON.", 502);

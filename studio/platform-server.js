@@ -96,7 +96,11 @@
     if (me.isAdmin) $("platTeam").onclick = openTeam;
     if (!me.ai) {
       const b = $("banner");
-      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">AI drafting isn't set up on this server yet. Add OPENAI_API_KEY and OPENAI_MODEL (or ANTHROPIC_API_KEY) to the server's .env. You can still review and edit drafts.</div>`;
+      if (b) b.innerHTML = `<div class="notice warn" style="margin-bottom:16px">AI drafting isn't set up yet. Add OPENAI_API_KEY and OPENAI_MODEL to the server's environment variables (on Vercel: Settings > Environment Variables) and redeploy. You can still review and edit drafts.<div id="platModels"></div></div>`;
+      if (me.isAdmin && me.provider === "openai") api("GET", "/api/models").then((r) => {
+        const el = $("platModels"); if (!el || !r.models?.length) return;
+        el.innerHTML = `<p style="margin:8px 0 4px"><b>Models your OpenAI key can use</b> (pick the newest general-purpose one for OPENAI_MODEL):</p><div class="plat-pw" style="max-height:160px;overflow:auto;font-size:12.5px">${r.models.map(esc).join("<br>")}</div>`;
+      }).catch(() => {});
     }
   }
 
@@ -178,7 +182,7 @@
     if (document.visibilityState === "visible" && me) {
       try { const { rev } = await api("GET", "/api/rev"); if (rev !== lastRev) { lastRev = rev; await Promise.all([...subscribed()].map(fetchCol)); } } catch { /* offline: try again next tick */ }
     }
-    setTimeout(poll, 5000);
+    setTimeout(poll, 8000);
   }
   const split = (p) => { const i = p.lastIndexOf("/"); return [p.slice(0, i), p.slice(i + 1)]; };
   const toDbErr = (e) => ({ code: e.status === 400 ? "invalid_argument" : "unavailable", message: e.message });
