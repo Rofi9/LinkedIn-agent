@@ -20,7 +20,7 @@ export const provider = (() => {
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-opus-5";
 // Server-side refusal fallbacks are on by default; CLAUDE_FALLBACKS=off disables them.
 const CLAUDE_FALLBACKS = process.env.CLAUDE_FALLBACKS !== "off";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "";
+const OPENAI_MODEL = (process.env.OPENAI_MODEL || "").trim();
 
 export const aiModel = provider === "openai" ? OPENAI_MODEL || "(OPENAI_MODEL not set)" : provider === "anthropic" ? CLAUDE_MODEL : "none";
 export const aiConfigured = () =>
@@ -85,7 +85,11 @@ async function askOpenAI(prompt) {
     });
   } catch (err) {
     if (err instanceof OpenAI.AuthenticationError) throw new AiError("config", "The server's OpenAI API key is missing or invalid.", 500);
-    if (err instanceof OpenAI.RateLimitError) throw new AiError("rate_limited", "The AI is busy or the OpenAI account is out of credit. Try again later.", 429);
+    if (err instanceof OpenAI.APIError) console.error(`OpenAI error ${err.status ?? ""} ${err.code ?? ""}: ${err.message}`);
+    if (err instanceof OpenAI.RateLimitError) {
+      if (err.code === "insufficient_quota") throw new AiError("no_credit", "The OpenAI account has no credit left. Add credit at platform.openai.com → Settings → Billing, then try again.", 402);
+      throw new AiError("rate_limited", `OpenAI's rate limit was reached for this account (${err.message}). Wait a minute and try again. New OpenAI accounts have low limits that rise after the first payments.`, 429);
+    }
     if (err instanceof OpenAI.NotFoundError) throw new AiError("config", `OpenAI doesn't recognize the model "${OPENAI_MODEL}". Check the exact model name in OPENAI_MODEL.`, 500);
     if (err instanceof OpenAI.BadRequestError) throw new AiError("invalid_request", err.message, 400);
     if (err instanceof OpenAI.APIError) throw new AiError("upstream_error", `AI service error ${err.status ?? ""}`.trim(), 502);

@@ -220,7 +220,8 @@
   async function sampleJson(prompt, opts) {
     if (opts?.signal?.aborted) throw { code: "cancelled" };
     try { const r = await api("POST", "/api/ai", { prompt }); return r.value; }
-    catch (e) { throw { code: e.code || "upstream_error", message: e.message }; }
+    // The server's messages are written for people, so show them as they are.
+    catch (e) { throw { code: e.message ? "config" : e.code || "upstream_error", message: e.message }; }
   }
   async function sample(prompt, opts) { const v = await sampleJson(prompt, opts); return { text: JSON.stringify(v), truncated: false, modelTierApplied: "default" }; }
   sample.json = sampleJson;
