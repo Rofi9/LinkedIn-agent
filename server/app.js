@@ -10,7 +10,7 @@ import {
   findUserByEmail, checkPassword, createSession, sessionUser, endSession, SESSION_DAYS,
   listUsers, createUser, deleteUser, setPassword, userCount, randomPassword,
 } from "./db.js";
-import { askJson, AiError, aiConfigured, aiModel, provider, listModels } from "./ai.js";
+import { askJson, AiError, aiConfigured, aiModel, provider, listModels, searchNews, NEWS_TOPICS } from "./ai.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ON_VERCEL = !!process.env.VERCEL;
@@ -169,6 +169,33 @@ app.post("/api/ai", auth, h(async (req, res) => {
     if (!(err instanceof AiError)) console.error(err);
     res.status(e.status).json({ error: e.code, message: e.message });
   }
+}));
+
+/* Web research: find recent items for one topic and add the new ones to Research. */
+app.get("/api/research/topics", auth, (req, res) => res.json(Object.entries(NEWS_TOPICS).map(([key, t]) => ({ key, label: t.label }))));
+app.post("/api/research/search", auth, h(async (req, res) => {
+  const months = Math.min(Math.max(Number(req.body?.months) || 4, 1), 12);
+  const sinceDate = new Date(); sinceDate.setMonth(sinceDate.getMonth() - months);
+  const since = sinceDate.toISOString().slice(0, 10);
+  let found;
+  try { found = await searchNews(String(req.body?.topic || ""), since); }
+  catch (err) {
+    const e = err instanceof AiError ? err : new AiError("upstream_error", "Something went wrong.");
+    if (!(err instanceof AiError)) console.error(err);
+    return res.status(e.status).json({ error: e.code, message: e.message });
+  }
+  const known = new Set((await listDocs("research")).map((d) => String(d.data.url || "").replace(/[#?].*$/, "").replace(/\/$/, "")));
+  const now = new Date().toISOString();
+  let added = 0, n = 0;
+  for (const r of found) {
+    const key = r.url.replace(/[#?].*$/, "").replace(/\/$/, "");
+    if (known.has(key)) continue;
+    known.add(key);
+    const id = "w" + Date.now().toString(36) + n++;
+    await putDoc("research", id, { id, ...r, addedAt: now, origin: "Web search" }, req.user.id);
+    added++;
+  }
+  res.json({ ok: true, found: found.length, added, since });
 }));
 
 /* ---------- research intake for automations (e.g. the news check) ---------- */

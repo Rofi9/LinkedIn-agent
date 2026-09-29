@@ -292,7 +292,22 @@ details.help ol{margin:8px 0 0;padding-left:20px}
       <div class="actions"><button class="btn primary" id="analyzeBtn">Analyze and suggest ideas</button><span id="analyzeMsg"></span></div>
       <div id="analyzeOut"></div>
     </div>
-    <div class="filters" id="resFilters"></div>
+    <div class="add" id="newsPanel" hidden>
+      <h3 style="font-size:17px">Find latest news</h3>
+      <p class="muted" style="margin:0;font-size:13.5px">The AI searches the web and keeps only items whose publication date falls in the period you pick. Each topic takes up to a minute or two.</p>
+      <div class="filters" id="newsTopics" style="margin:0"></div>
+      <div class="actions">
+        <select id="newsMonths" aria-label="Period" style="width:auto">
+          <option value="1">Last month</option><option value="2">Last 2 months</option><option value="3">Last 3 months</option><option value="4" selected>Last 4 months</option>
+        </select>
+        <button class="btn primary" id="newsBtn">Search the web</button>
+      </div>
+      <div id="newsMsg"></div>
+    </div>
+    <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+      <div class="filters" id="resFilters" style="margin:0"></div>
+      <label style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="freshOnly" checked> Only the last 4 months</label>
+    </div>
     <div class="res" id="resList"></div>
   </section>
 
@@ -548,10 +563,19 @@ details.help ol{margin:8px 0 0;padding-left:20px}
     },
   });
 
-  const caps = { db, sample, downloads };
+  /* ---------- web research (server only) ---------- */
+  const search = Object.freeze({
+    topics: () => api("GET", "/api/research/topics"),
+    run: async (topic, months) => {
+      try { return await api("POST", "/api/research/search", { topic, months }); }
+      catch (e) { throw { code: "config", message: e.message || "The search failed. Try again." }; }
+    },
+  });
+
+  const caps = { db, sample, downloads, search };
   const aiReady = () => !!me?.ai;
   window.claude = Object.freeze({
-    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if (name === "sample" && !aiReady()) return null; return caps[name] || null; },
+    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if ((name === "sample" || name === "search") && !aiReady()) return null; return caps[name] || null; },
   });
 })();
 
@@ -630,11 +654,21 @@ function detect(text){
 }
 
 /* ---------------- state & helpers ---------------- */
-const S={db:null,sample:null,downloads:null,ideas:[],posts:[],research:[],voice:"",tab:"ideas",ideaFilter:"new",draftFilter:"open",resFilter:"all",current:null,dirty:false,vis:{postId:null,template:"stat",slides:[],slide:0,theme:"light",fields:{}}};
+const S={db:null,sample:null,downloads:null,ideas:[],posts:[],research:[],voice:"",tab:"ideas",ideaFilter:"new",draftFilter:"open",resFilter:"all",freshOnly:true,current:null,dirty:false,vis:{postId:null,template:"stat",slides:[],slide:0,theme:"light",fields:{}}};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const PILLARS={A:"Generic isn't enough",B:"Knowing how is the barrier",C:"Limitations matter",D:"Doctors learn from doctors",E:"Not a one-time training"};
 const KINDS={hospital:"Hospital",government:"Government",physician:"Doctor",study:"Study",competitor:"Competitor",topic:"Topic",news:"News",linkedin:"LinkedIn"};
+/* Research freshness: items older than 4 months, or without a clear date, are hidden by default. */
+const MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(s){
+  s=String(s||"").trim(); let m;
+  if((m=s.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/))) return new Date(+m[1],+m[2]-1,+(m[3]||1));
+  if((m=s.match(/(?:(\d{1,2})\s+)?([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/))&&MONTHS[m[2].toLowerCase()]!==undefined) return new Date(+m[3],MONTHS[m[2].toLowerCase()],+(m[1]||1));
+  return null;
+}
+const FRESH_MONTHS=4;
+function isFresh(r){ const d=parseDate(r.date); if(!d) return false; const c=new Date(); c.setMonth(c.getMonth()-FRESH_MONTHS); return d>=c; }
 let toastT; function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600);}
 const now=()=>new Date().toISOString();
 const fmtDate=iso=>{ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?iso:d.toLocaleDateString(undefined,{day:"numeric",month:"short"}); };
@@ -669,7 +703,7 @@ function showTab(t){
 /* ---------------- prompt context ---------------- */
 function hooksBrief(){ return HOOKS.hooks.map(h=>`#${h.id} ${h.name}: ${h.template} (best for: ${h.best}; trap: ${h.trap})`).join("\n"); }
 function researchBrief(limit=40,kind=""){
-  let items=S.research.slice();
+  let items=S.research.filter(r=>!S.freshOnly||isFresh(r));
   if(kind==="region") items=items.filter(r=>/armenia|gulf|uae|saudi|qatar|abu dhabi|dubai|cis|uzbek|caucas/i.test((r.title||"")+" "+(r.summary||"")+" "+(r.region||"")));
   else if(kind) items=items.filter(r=>r.kind===kind);
   items.sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));
@@ -759,6 +793,7 @@ $("suggestBtn").onclick=async()=>{
   const btn=$("suggestBtn"), m=$("ideaMsg");
   if(!S.sample){ m.innerHTML=`<div class="notice warn">AI isn't available in this view.</div>`; return; }
   const focus=$("ideaFocus").value;
+  if(S.freshOnly&&!S.research.some(isFresh)){ m.innerHTML=`<div class="notice warn">There's no research from the last 4 months yet, and ideas are built only from recent research. Go to Research and use “Find latest news” first.</div>`; return; }
   btn.disabled=true; m.innerHTML=`<p><span class="thinking">AI is reading your research and looking for angles…</span></p>`;
   const existing=S.ideas.map(i=>"- "+i.hook).slice(0,80).join("\n");
   const prompt=`You suggest LinkedIn post ideas for the Darman.ai company page.
@@ -784,6 +819,7 @@ ${researchBrief(45,focus)}
 IDEAS ALREADY IN THE LIST (don't repeat them):
 ${existing}
 
+Today is ${new Date().toISOString().slice(0,10)}. Only use research from the last 4 months.
 Suggest 5 NEW post ideas${focus?` focused on: ${$("ideaFocus").selectedOptions[0].text}`:""}. Each must rest on one specific fact from RESEARCH, with its source URL copied exactly. Prefer a mix of pillars and of audiences (hospital leaders and practicing doctors).
 
 Reply with only a JSON array of 5 objects: {"hook": string (the first line, under 140 characters), "angle": string (one sentence: what the post argues), "pillar": "A"|"B"|"C"|"D"|"E", "hookId": number, "fact": string (the exact fact used), "url": string, "caution": string (how not to overclaim)}`;
@@ -956,13 +992,16 @@ Keep every fact exactly as it is (don't add new numbers or claims). Keep it unde
 /* ---------------- research ---------------- */
 function renderResearch(){
   const f=S.resFilter;
-  $("c-research").textContent=S.research.length;
-  const kinds=["all",...Object.keys(KINDS).filter(k=>S.research.some(r=>r.kind===k))];
-  $("resFilters").innerHTML=kinds.map(k=>`<button aria-pressed="${f===k}" data-f="${k}">${k==="all"?"All":KINDS[k]} · ${k==="all"?S.research.length:S.research.filter(r=>r.kind===k).length}</button>`).join("");
+  const shown=S.research.filter(r=>!S.freshOnly||isFresh(r));
+  $("c-research").textContent=shown.length;
+  const kinds=["all",...Object.keys(KINDS).filter(k=>shown.some(r=>r.kind===k))];
+  $("resFilters").innerHTML=kinds.map(k=>`<button aria-pressed="${f===k}" data-f="${k}">${k==="all"?"All":KINDS[k]} · ${k==="all"?shown.length:shown.filter(r=>r.kind===k).length}</button>`).join("");
   $("resFilters").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.resFilter=b.dataset.f;renderResearch();});
-  const list=S.research.filter(r=>f==="all"||r.kind===f).sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));
-  $("resList").innerHTML=list.length?list.map(r=>`<div class="res-item"><div><span class="chip">${esc(KINDS[r.kind]||r.kind)}</span>${r.date?`<div class="muted mono" style="font-size:12px;margin-top:6px">${esc(r.date)}</div>`:""}</div><div><h4>${esc(r.title)}</h4><p>${esc(r.summary)}</p>${r.fact?`<p style="margin-top:6px"><b>Usable fact:</b> ${esc(r.fact)}</p>`:""}${r.caution?`<p class="muted" style="margin-top:4px;font-size:12.5px">${esc(r.caution)}</p>`:""}${r.url?`<div class="src" style="margin-top:6px"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,"").slice(0,70))}</a></div>`:""}</div><div></div></div>`).join(""):`<div class="empty">No research yet.</div>`;
+  const pool=S.research.filter(r=>!S.freshOnly||isFresh(r));
+  const list=pool.filter(r=>f==="all"||r.kind===f).sort((a,b)=>((parseDate(b.date)||0)-(parseDate(a.date)||0))||(b.addedAt||"").localeCompare(a.addedAt||""));
+  $("resList").innerHTML=list.length?list.map(r=>`<div class="res-item"><div><span class="chip">${esc(KINDS[r.kind]||r.kind)}</span>${r.date?`<div class="muted mono" style="font-size:12px;margin-top:6px">${esc(r.date)}</div>`:""}</div><div><h4>${esc(r.title)}</h4><p>${esc(r.summary)}</p>${r.fact?`<p style="margin-top:6px"><b>Usable fact:</b> ${esc(r.fact)}</p>`:""}${r.caution?`<p class="muted" style="margin-top:4px;font-size:12.5px">${esc(r.caution)}</p>`:""}${r.url?`<div class="src" style="margin-top:6px"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.replace(/^https?:\/\//,"").slice(0,70))}</a></div>`:""}</div><div></div></div>`).join(""):`<div class="empty">${S.freshOnly?"Nothing from the last 4 months yet. Use “Find latest news” above to search the web.":"No research yet."}</div>`;
 }
+$("freshOnly").addEventListener("change",e=>{ S.freshOnly=e.target.checked; renderResearch(); });
 $("analyzeBtn").onclick=async()=>{
   const text=$("resText").value.trim(), url=$("resUrl").value.trim(), kind=$("resKind").value;
   const m=$("analyzeMsg"), out=$("analyzeOut");
@@ -1197,6 +1236,30 @@ Reply with only JSON: ${shapes[t]}`;
   }catch(e){ m.innerHTML=`<div class="notice err">${esc(sampleErr(e))}</div>`; btn.disabled=false; }
 }
 
+/* ---------------- web research (self-hosted version only) ---------------- */
+function setupNews(search){
+  $("newsPanel").hidden=false;
+  const chosen=new Set(["hospitals","regulation","studies"]);
+  search.topics().then(topics=>{
+    const draw=()=>{ $("newsTopics").innerHTML=topics.map(t=>`<button aria-pressed="${chosen.has(t.key)}" data-k="${esc(t.key)}">${esc(t.label)}</button>`).join("");
+      $("newsTopics").querySelectorAll("button").forEach(b=>b.onclick=()=>{ chosen.has(b.dataset.k)?chosen.delete(b.dataset.k):chosen.add(b.dataset.k); draw(); }); };
+    draw();
+    $("newsBtn").onclick=async()=>{
+      if(!chosen.size){ $("newsMsg").innerHTML=`<p class="muted">Pick at least one topic.</p>`; return; }
+      const btn=$("newsBtn"); btn.disabled=true; const months=Number($("newsMonths").value);
+      const lines=[]; const show=()=>{ $("newsMsg").innerHTML=lines.join(""); };
+      for(const key of [...chosen]){
+        const label=(topics.find(t=>t.key===key)||{}).label||key;
+        lines.push(`<p style="margin:4px 0" id="nl-${esc(key)}"><span class="thinking">${esc(label)}: searching…</span></p>`); show();
+        try{ const r=await search.run(key,months); lines[lines.length-1]=`<p style="margin:4px 0">✓ ${esc(label)}: ${r.added} new item${r.added===1?"":"s"}${r.found>r.added?` (${r.found-r.added} already in Research)`:""}</p>`; }
+        catch(e){ lines[lines.length-1]=`<p style="margin:4px 0;color:var(--bad)">${esc(label)}: ${esc(e.message||"search failed")}</p>`; }
+        show();
+      }
+      btn.disabled=false; S.freshOnly=true; $("freshOnly").checked=true; renderResearch();
+    };
+  }).catch(()=>{ $("newsPanel").hidden=true; });
+}
+
 /* ---------------- db wiring ---------------- */
 async function writeDoc(path,data){
   if(!S.db){ toast("Saving isn't available in this view"); return false; }
@@ -1213,8 +1276,9 @@ async function boot(){
   try{ const t=localStorage.getItem("studio.tab"); if(t&&t!=="ideas") showTab(t); }catch(e){}
   renderIdeas(); renderDrafts(); renderResearch();
   const use=n=>(window.claude&&window.claude.use)?window.claude.use(n):Promise.resolve(null);
-  const [db,sample,downloads]=await Promise.all([use("db"),use("sample"),use("downloads")]);
-  S.sample=sample; S.downloads=downloads; S.db=db;
+  const [db,sample,downloads,search]=await Promise.all([use("db"),use("sample"),use("downloads"),use("search")]);
+  S.sample=sample; S.downloads=downloads; S.db=db; S.search=search;
+  if(search) setupNews(search);
   if(!db){ setStatus(false,"Offline copy: open Studio in claude.ai to load your drafts"); $("banner").innerHTML=`<div class="notice warn" style="margin-bottom:16px">This copy can't reach Studio's saved data. Open it from claude.ai while signed in.</div>`; return; }
   setStatus(true, sample?"Synced · AI ready":"Synced · AI unavailable");
   const onErr=e=>{ if(e.code==="revoked") setStatus(false,"Access changed. Reload the page."); };

@@ -238,9 +238,18 @@
     },
   });
 
-  const caps = { db, sample, downloads };
+  /* ---------- web research (server only) ---------- */
+  const search = Object.freeze({
+    topics: () => api("GET", "/api/research/topics"),
+    run: async (topic, months) => {
+      try { return await api("POST", "/api/research/search", { topic, months }); }
+      catch (e) { throw { code: "config", message: e.message || "The search failed. Try again." }; }
+    },
+  });
+
+  const caps = { db, sample, downloads, search };
   const aiReady = () => !!me?.ai;
   window.claude = Object.freeze({
-    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if (name === "sample" && !aiReady()) return null; return caps[name] || null; },
+    use: async (name) => { await authed; if (name === "db" && !pollStarted) { pollStarted = true; setTimeout(poll, 5000); } if ((name === "sample" || name === "search") && !aiReady()) return null; return caps[name] || null; },
   });
 })();

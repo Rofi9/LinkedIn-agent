@@ -111,6 +111,75 @@ export async function askJson(prompt) {
   return value;
 }
 
+/* ---------- Web research: recent news with verified dates ---------- */
+export const NEWS_TOPICS = {
+  hospitals: { label: "Hospitals adopting AI", kind: "hospital", about: "hospitals and health systems announcing, piloting or reporting results of AI in clinical work: generative AI, ambient AI scribes, chart summaries, AI training for their clinicians, AI governance, and failures, errors or lawsuits" },
+  regulation: { label: "Governments and regulation", kind: "government", about: "government and regulator actions on AI in healthcare and on AI literacy for health workers: EU AI Act, UK NHS and MHRA, US FDA and HHS, WHO, UAE, Saudi Arabia, Qatar, Armenia and other countries" },
+  studies: { label: "New studies", kind: "study", about: "new peer-reviewed studies and trials about AI in clinical practice and how doctors use it (NEJM AI, JAMA, The Lancet, Nature Medicine, BMJ, npj Digital Medicine and similar), including safety, accuracy, deskilling and bias" },
+  education: { label: "Training doctors in AI", kind: "physician", about: "AI training and education for doctors: medical schools, residency programs, continuing medical education courses, national physician AI-literacy programs, and well-known physicians publicly writing about AI in medicine" },
+  region: { label: "Armenia, the Gulf and the CIS", kind: "news", about: "AI in healthcare in Armenia, Georgia, the South Caucasus, Central Asia and the CIS, and the Gulf states (UAE, Saudi Arabia, Qatar, Kuwait, Oman, Bahrain)" },
+  market: { label: "Training market and competitors", kind: "competitor", about: "companies and institutions offering AI training or AI courses for clinicians and hospitals: launches, partnerships, funding and new programs" },
+};
+
+const iso = (d) => d.toISOString().slice(0, 10);
+
+/* Ask the model to search the web and return dated items as JSON. */
+async function searchText(prompt) {
+  if (provider === "openai") {
+    try {
+      const r = await openaiClient().responses.create({ model: OPENAI_MODEL, tools: [{ type: "web_search" }], input: prompt });
+      return r.output_text || "";
+    } catch (err) {
+      if (err instanceof OpenAI.APIError) console.error(`OpenAI search error ${err.status ?? ""} ${err.code ?? ""}: ${err.message}`);
+      if (err instanceof OpenAI.RateLimitError && err.code === "insufficient_quota") throw new AiError("no_credit", "The OpenAI account has no credit left. Add credit at platform.openai.com → Settings → Billing.", 402);
+      if (err instanceof OpenAI.RateLimitError) throw new AiError("rate_limited", "OpenAI's rate limit was reached. Wait a minute and try again.", 429);
+      if (err instanceof OpenAI.APIError) throw new AiError("upstream_error", `Web search failed (${err.message})`, 502);
+      throw new AiError("upstream_error", "Couldn't reach the AI service.", 502);
+    }
+  }
+  try {
+    const r = await anthropicClient().messages.create({
+      model: CLAUDE_MODEL, max_tokens: 16000,
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 6 }],
+      messages: [{ role: "user", content: prompt }],
+    });
+    if (r.stop_reason === "refusal") throw new AiError("refused", "The AI declined this search.", 422);
+    return r.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+  } catch (err) {
+    if (err instanceof AiError) throw err;
+    if (err instanceof Anthropic.APIError) throw new AiError("upstream_error", `Web search failed (${err.message})`, 502);
+    throw new AiError("upstream_error", "Couldn't reach the AI service.", 502);
+  }
+}
+
+/* Returns [{title, kind, date, summary, fact, url, caution}] published on or after `since` (YYYY-MM-DD). */
+export async function searchNews(topicKey, since) {
+  const topic = NEWS_TOPICS[topicKey];
+  if (!topic) throw new AiError("invalid_request", "Unknown topic.", 400);
+  if (!aiConfigured()) throw new AiError("config", "AI isn't set up on the server yet.", 503);
+  const today = iso(new Date());
+  const prompt = `Today is ${today}. You research news for Darman.ai, which teaches physicians to use AI practically and responsibly. The reader has no medical background.
+
+Search the web for ${topic.about}, PUBLISHED BETWEEN ${since} AND ${today}.
+
+Rules:
+- Only include items whose publication date you checked on the page itself and that fall between ${since} and ${today}. Skip anything older, undated, or that you only saw in a search snippet.
+- Prefer primary sources (the hospital, regulator, journal or company) and reputable press.
+- Never invent titles, numbers, people or quotes. Every number must appear in the source.
+- Up to 6 items, most important first. If nothing qualifies, return [].
+
+Reply with only a JSON array of objects:
+{"title": string (short), "date": "YYYY-MM-DD" (publication date), "summary": string (2-3 plain-English sentences; define any medical term in brackets), "fact": string (the one most useful fact, worded as the source states it), "url": string (the page you read), "caution": string (one line: how solid it is and what not to overclaim)}`;
+  const value = parseJson(await searchText(prompt + JSON_ONLY));
+  if (!Array.isArray(value)) throw new AiError("invalid_json", "The AI's search results weren't in the expected format. Try again.", 502);
+  return value
+    .filter((x) => x && typeof x === "object" && x.title && /^https?:\/\//.test(String(x.url || "")))
+    .map((x) => ({ ...x, date: String(x.date || "").slice(0, 10) }))
+    // Keep only verified dates inside the window.
+    .filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && x.date >= since && x.date <= today)
+    .map((x) => ({ kind: topic.kind, title: String(x.title), date: x.date, summary: String(x.summary || ""), fact: String(x.fact || ""), url: String(x.url), caution: String(x.caution || "") }));
+}
+
 /* For `node manage.js models`: the model IDs this key can use. */
 export async function listModels() {
   if (provider === "openai") { const out = []; for await (const m of openaiClient().models.list()) out.push(m.id); return out.sort(); }
