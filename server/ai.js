@@ -164,9 +164,9 @@ Search the web for ${topic.about}, PUBLISHED BETWEEN ${since} AND ${today}.
 
 Rules:
 - Only include items whose publication date you checked on the page itself and that fall between ${since} and ${today}. Skip anything older, undated, or that you only saw in a search snippet.
-- Prefer primary sources (the hospital, regulator, journal or company) and reputable press.
+- Look beyond news sites: include press releases, journal articles, official reports, guidance documents, conference announcements and physicians' own articles or newsletters. Prefer primary sources (the hospital, regulator, journal or company) and reputable press.
 - Never invent titles, numbers, people or quotes. Every number must appear in the source.
-- Up to 6 items, most important first. If nothing qualifies, return [].
+- Up to 8 items, most important first. Cover different organizations and countries rather than several items about the same story. If nothing qualifies, return [].
 
 Reply with only a JSON array of objects:
 {"title": string (short), "date": "YYYY-MM-DD" (publication date), "summary": string (2-3 plain-English sentences; define any medical term in brackets), "fact": string (the one most useful fact, worded as the source states it), "url": string (the page you read), "caution": string (one line: how solid it is and what not to overclaim)}`;

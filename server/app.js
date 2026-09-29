@@ -174,7 +174,7 @@ app.post("/api/ai", auth, h(async (req, res) => {
 /* Web research: find recent items for one topic and add the new ones to Research. */
 app.get("/api/research/topics", auth, (req, res) => res.json(Object.entries(NEWS_TOPICS).map(([key, t]) => ({ key, label: t.label }))));
 app.post("/api/research/search", auth, h(async (req, res) => {
-  const months = Math.min(Math.max(Number(req.body?.months) || 4, 1), 12);
+  const months = Math.min(Math.max(Number(req.body?.months) || 2, 1), 12);
   const sinceDate = new Date(); sinceDate.setMonth(sinceDate.getMonth() - months);
   const since = sinceDate.toISOString().slice(0, 10);
   let found;
